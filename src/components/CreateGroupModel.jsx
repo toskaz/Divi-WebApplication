@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function CreateGroupModal({ onClose, onCreate }) {
   const [groupName, setGroupName] = useState("");
   const [description, setDescription] = useState("");
   const [currency, setCurrency] = useState("PLN");
+  const firstRef = useRef(null);
+
+  useEffect(() => {
+    firstRef.current?.focus();
+  }, []);
 
   const knownUsers = {
     "tosia@gmail.com": "Tosia",
@@ -80,8 +85,8 @@ export default function CreateGroupModal({ onClose, onCreate }) {
   }
 
   return (
-    <div className="modalOverlay" onMouseDown={onClose}>
-      <div className="modalCard" onMouseDown={(e) => e.stopPropagation()}>
+    <div className="modalOverlay" onClick={onClose}>
+      <div className="modalCard" onClick={(e) => e.stopPropagation()}>
         <div className="modalHeader">
           <div className="modalTitle">Create New Group</div>
           <button className="iconBtn" type="button" onClick={onClose}>
@@ -93,6 +98,7 @@ export default function CreateGroupModal({ onClose, onCreate }) {
           <div className="field">
             <label>Group name *</label>
             <input
+              ref={firstRef}
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="e.g. Weekend in the mountains"

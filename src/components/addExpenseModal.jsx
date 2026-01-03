@@ -1,22 +1,40 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export default function AddExpenseModal({ isOpen, onClose,onSave, participants }) {
-    const [splitType, setSplitType] = useState('equally'); // 'equally' lub 'custom'
+export default function AddExpenseModal({ isOpen, onClose, onSave, participants }) {
+    const [amount, setAmount] = useState("");
+    const [date, setDate] = useState("2025-11-22");
+    const [description, setDescription] = useState("");
+    const [payer, setPayer] = useState("You (You)");
+    const firstRef = useRef(null);
+    useEffect(() => {
+    if (isOpen) firstRef.current?.focus();
+    }, [isOpen]);
+    
+    const [splitType, setSplitType] = useState('equally'); 
     const [showExchangeRate, setShowExchangeRate] = useState(false);
 
     if (!isOpen) return null;
+    
     const handleSubmit = (e) => {
         e.preventDefault(); 
-        onSave(); 
+        onSave({
+            amount,
+            date,
+            description,
+            payer,
+            splitType
+        }); 
+        // Czyścimy pola
+        setAmount("");
+        setDescription("");
     };
 
-
     return (
-        <div className="modal-overlay">
-            <div className="modal-container">
+        <div className="modal-overlay"  onClick={onClose}>
+            <div className="modal-container" onClick={(e) => e.stopPropagation()}>
                 <header className="modal-header">
                     <h2>Add Expense</h2>
-                    <button className="close-x" onClick={onClose}>&times;</button>
+                    <button className="close-x" onClick={onClose} type="button">&times;</button>
                 </header>
 
                 <form className="expense-form" onSubmit={handleSubmit}>
@@ -24,7 +42,14 @@ export default function AddExpenseModal({ isOpen, onClose,onSave, participants }
                         <div className="form-group">
                             <label>Amount <span className="required">*</span></label>
                             <div className="amount-input-wrapper">
-                                <input type="number" placeholder="500" />
+                                <input 
+                                    ref={firstRef}
+                                    type="number" 
+                                    placeholder="500" 
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    required
+                                />
                                 <select className="currency-select">
                                     <option>GBP</option>
                                     <option>PLN</option>
@@ -35,7 +60,11 @@ export default function AddExpenseModal({ isOpen, onClose,onSave, participants }
 
                         <div className="form-group">
                             <label>Date</label>
-                            <input type="date" defaultValue="2025-11-22" />
+                            <input 
+                                type="date" 
+                                value={date} 
+                                onChange={(e) => setDate(e.target.value)} // Naprawia pisanie
+                            />
                         </div>
                     </div>
 
@@ -56,19 +85,27 @@ export default function AddExpenseModal({ isOpen, onClose,onSave, participants }
                                 </div>
                             </div>
                         )}
-                        <div className="total-converted">Total: 2411.00 PLN</div>
+                        <div className="total-converted">Total: {(parseFloat(amount || 0) * 4.822).toFixed(2)} PLN</div>
                     </div>
 
                     <div className="form-group">
                         <label>Description <span className="required">*</span></label>
-                        <input type="text" placeholder="Grocery Shopping" />
+                        <input 
+                            type="text" 
+                            placeholder="Grocery Shopping" 
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)} // Naprawia pisanie
+                            required
+                        />
                     </div>
 
                     <div className="form-group">
                         <label>Who paid? <span className="required">*</span></label>
-                        <select>
-                            <option>You (You)</option>
-                            {participants?.map(p => <option key={p.id}>{p.name}</option>)}
+                        <select value={payer} onChange={(e) => setPayer(e.target.value)}>
+                            <option value="You (You)">You (You)</option>
+                            {participants?.map(p => (
+                                <option key={p.id} value={p.name}>{p.name}</option>
+                            ))}
                         </select>
                     </div>
 
@@ -94,7 +131,6 @@ export default function AddExpenseModal({ isOpen, onClose,onSave, participants }
                             <div className="participant-row">
                                 <label className="checkbox-container">
                                     <input type="checkbox" defaultChecked />
-                                    <span className="checkmark"></span>
                                     You (You)
                                 </label>
                                 <div className="split-amount">
@@ -102,20 +138,9 @@ export default function AddExpenseModal({ isOpen, onClose,onSave, participants }
                                     <span>PLN</span>
                                 </div>
                             </div>
-                            <div className="participant-row">
-                                <label className="checkbox-container">
-                                    <input type="checkbox" defaultChecked />
-                                    <span className="checkmark"></span>
-                                    Kasia
-                                </label>
-                                <div className="split-amount">
-                                    <input type="number" defaultValue="2091" />
-                                    <span>PLN</span>
-                                </div>
-                            </div>
                             <div className="split-total-footer">
                                 <span>Split total:</span>
-                                <span className="valid">2411.00 / 2411.00 PLN</span>
+                                <span className="valid">PLN zapłacone</span>
                             </div>
                         </div>
                     )}
