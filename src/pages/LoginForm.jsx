@@ -1,4 +1,4 @@
-import "../styles/login.css";
+import "../styles/auth.css";
 import logo from "../assets/logo.png";
 import { useState } from "react";
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import logo from "../assets/logo.png";
+import "../styles/mainView.css";
 import CreateGroupModal from "../components/CreateGroupModel";
 
 export default function MainView({ onLogout, onSelectGroup }) {

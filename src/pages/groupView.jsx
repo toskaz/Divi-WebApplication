@@ -1,6 +1,6 @@
 import { useState } from "react";
-import AddExpenseModal from "./addExpenseModal";
-import "../groupView.css";
+import AddExpenseModal from "../components/addExpenseModal";
+import "../styles/groupView.css";
 export default function GroupView({ onBack }) {
     const [activeTab, setActiveTab] = useState('history');
     const [isModalOpen, setIsModalOpen] = useState(false);

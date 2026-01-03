@@ -4,8 +4,6 @@ import Login  from './pages/LoginForm';
 import Register from "./pages/RegisterForm";
 import MainView from "./pages/mainView";  
 import GroupView from "./pages/groupView"; 
-import "./mainView.css";
-import "./groupView.css";
 
 function App() {
   const [view, setView] = useState("login");
