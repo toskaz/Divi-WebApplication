@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function Login({ goToRegister}) {
+export default function Login({ goToRegister, onLogin }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -12,6 +12,7 @@ export default function Login({ goToRegister}) {
 
         if (email === DEMO_EMAIL && password === DEMO_PASS) {
             alert("Login success");
+            onLogin();
         } else {
             alert("Wrong email or password");
         }
@@ -58,7 +59,7 @@ export default function Login({ goToRegister}) {
                         />
                     </div>
 
-                    <button className="primary" type="submit">
+                    <button className="primary" type="submit" >
                         Sign in
                     </button>
                 </form>

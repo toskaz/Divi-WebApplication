@@ -1,10 +1,10 @@
-export default function MainView() {
+export default function MainView({ onLogout, onSelectGroup }) {
     return(
         <>
             <header className="main-header">
                 <nav>
                 <div className="logo">Divi</div>
-                <button className="logout-btn">Logout</button>
+                <button className="logout-btn" onClick={onLogout}>Logout</button>
                 </nav>
             </header>
 
@@ -17,7 +17,7 @@ export default function MainView() {
                     <button className="create-group-btn">+ New Group</button>
                 </div>
                 <div className="groups-container">
-                    <article className="group-card">
+                    <article className="group-card" onClick={onSelectGroup}>
                         <h2>Trip to Spain</h2>
                         <p>Hotel and restaurant expenses</p>
                         <div className="group-stats">
@@ -30,7 +30,7 @@ export default function MainView() {
                         </div>
                     </article>
 
-                    <article className="group-card">
+                    <article className="group-card" onClick={onSelectGroup}>
                         <h2>Weekend Getaway</h2>
                         <p>Cabin and groceries</p>
                         <div className="group-stats">
@@ -43,7 +43,7 @@ export default function MainView() {
                         </div>
                     </article>
 
-                    <article className="group-card">
+                    <article className="group-card" onClick={onSelectGroup}>
                         <h2>Office Party</h2>
                         <p>Decorations and food</p>
                         <div className="group-stats">

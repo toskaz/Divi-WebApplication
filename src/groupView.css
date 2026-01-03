@@ -1,0 +1,335 @@
+/* Zmienne kolorystyczne spójne z MainView */
+:root {
+  --primary-blue: #3b59ff;
+  --bg-color: #f8f9fd;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --white: #ffffff;
+  --positive: #22c55e;
+  --positive-bg: #f0fdf4;
+  --negative: #ef4444;
+  --negative-bg: #fef2f2;
+  --info-bg: #eff6ff;
+  --info-text: #3b82f6;
+}
+
+/* Nagłówek grupy */
+.group-header {
+  background-color: var(--white);
+  padding: 1.5rem 2rem 0.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.back-btn {
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+}
+
+.back-btn:hover {
+  color: var(--primary-blue);
+}
+
+.title-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 1rem;
+}
+
+.title-bar h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.action-btn {
+  display: flex;
+  gap: 12px;
+  float: right;
+}
+
+.btn-delete {
+  background-color: var(--negative-bg);
+  color: var(--negative);
+  border: 1px solid #fee2e2;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-add {
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.stats-row {
+  display: flex;
+  gap: 20px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  padding-bottom: 1.5rem;
+}
+
+/* Nawigacja zakładkami */
+.tabs-nav {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--border-color);
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  padding: 0 2rem;
+  background-color: var(--white);
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 12px 0;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.tab-btn.active {
+  color: var(--primary-blue);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--primary-blue);
+}
+
+/* Kontener treści */
+.tab-content {
+  max-width: 800px;
+  margin: 0 auto 4rem;
+  padding: 0 2rem;
+}
+
+/* Historia wydatków */
+.date-label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 2rem 0 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.expense-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.expense-info {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.expense-icon {
+  background: var(--info-bg);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 1.2rem;
+}
+
+.expense-details h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+}
+
+.expense-details span, .expense-details p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.expnese-amounts {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.expnese-amounts .total {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.expnese-amounts .your-share {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* Balanse i Info Boxy */
+.info-box {
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.info-box.blue {
+  background-color: var(--info-bg);
+  border-color: #dbeafe;
+  color: var(--info-text);
+}
+
+.info-box h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+}
+
+.info-box p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.balance-card {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+}
+
+.balance-card.positive {
+  background-color: var(--positive-bg);
+  border-color: #dcfce7;
+}
+
+.balance-card.negative {
+  background-color: var(--negative-bg);
+  border-color: #fee2e2;
+}
+
+.status-icon {
+  margin-right: 15px;
+  font-size: 1.2rem;
+}
+
+.user-details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.balance-card.positive .balance-amount { color: var(--positive); }
+.balance-card.negative .balance-amount { color: var(--negative); }
+
+/* Sekcja Rozliczeń (How to settle) */
+.transfer-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.transfer-details {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  width: 100%;
+  justify-content: center;
+}
+
+.transfer-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.amount-bubble {
+  background: var(--primary-blue);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.mark-btn {
+  background: none;
+  border: 1px solid var(--primary-blue);
+  color: var(--primary-blue);
+  padding: 8px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.mark-btn:hover {
+  background: var(--primary-blue);
+  color: white;
+}
+
+.success-box {
+  background-color: var(--positive-bg);
+  border: 1px solid #dcfce7;
+  padding: 1rem;
+  border-radius: 12px;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.success-box.secondary {
+  background-color: transparent;
+  border-style: dashed;
+}
+
+.success-text strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--positive);
+}
+
+.success-text p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

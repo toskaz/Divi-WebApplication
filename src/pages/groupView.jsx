@@ -1,8 +1,11 @@
-export default function GroupView() {
+import { useState } from "react";
+export default function GroupView({ onBack }) {
+    const [activeTab, setActiveTab] = useState('history');
+
     return(
         <>
             <header className="group-header">
-                <div className="back-btn">← Back to groups</div>
+                <div className="back-btn" onClick={onBack}>← Back to groups</div>
 
                 <div className="title-bar">
                     <h1>Trip to Spain</h1>
