@@ -1,20 +1,3 @@
-/* Zmienne kolorystyczne spójne z MainView */
-:root {
-  --primary-blue: #3b59ff;
-  --bg-color: #f8f9fd;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --white: #ffffff;
-  --positive: #22c55e;
-  --positive-bg: #f0fdf4;
-  --negative: #ef4444;
-  --negative-bg: #fef2f2;
-  --info-bg: #eff6ff;
-  --info-text: #3b82f6;
-}
-
-/* Nagłówek grupy */
 .group-header {
   background-color: var(--white);
   padding: 1.5rem 2rem 0.5rem;
@@ -81,7 +64,6 @@
   padding-bottom: 1.5rem;
 }
 
-/* Nawigacja zakładkami */
 .tabs-nav {
   display: flex;
   gap: 24px;

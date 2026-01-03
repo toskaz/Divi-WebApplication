@@ -1,9 +1,24 @@
+import { useState } from "react";
+import logo from "../assets/logo.png";
+import "../styles/mainView.css";
+import CreateGroupModal from "../components/CreateGroupModel";
+
 export default function MainView({ onLogout, onSelectGroup }) {
+    const [showCreateGroup, setShowCreateGroup] = useState(false);
+
+    function handleCreateGroup(data) {
+        console.log("New group:", data);
+        alert("Group created.");
+        setShowCreateGroup(false);
+    }
+
     return(
         <>
             <header className="main-header">
                 <nav>
-                <div className="logo">Divi</div>
+                <div className="logo">
+                     <img src={logo} alt="Divi logo" />
+                </div>
                 <button className="logout-btn" onClick={onLogout}>Logout</button>
                 </nav>
             </header>
@@ -14,7 +29,9 @@ export default function MainView({ onLogout, onSelectGroup }) {
                     <h1>My Groups</h1>
                     <p>Manage your shared expenses</p>
                     </div>
-                    <button className="create-group-btn">+ New Group</button>
+                    <button className="create-group-btn"onClick={() => setShowCreateGroup(true)}>
+                        + New Group
+                    </button>
                 </div>
                 <div className="groups-container">
                     <article className="group-card" onClick={onSelectGroup}>
@@ -57,8 +74,12 @@ export default function MainView({ onLogout, onSelectGroup }) {
                     </article>
                 </div>
             </main>
+            {showCreateGroup && (
+                <CreateGroupModal
+                     onClose={() => setShowCreateGroup(false)}
+                    onCreate={handleCreateGroup}
+                />
+            )}
         </>
     );
-
-
 }
