@@ -1,6 +1,14 @@
 import { useState } from "react";
+import AddExpenseModal from "./addExpenseModal";
+import "../groupView.css";
 export default function GroupView({ onBack }) {
     const [activeTab, setActiveTab] = useState('history');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleSaveExpense = () => {
+        setIsModalOpen(false);
+        setActiveTab('history');
+    };
 
     return(
         <>
@@ -13,8 +21,15 @@ export default function GroupView({ onBack }) {
                 </div>
                 <div className="action-btn">
                     <button className="btn-delete">🗑️ Delete Group</button>
-                    <button className="btn-add">+ Add Expense</button>
+                    <button className="btn-add" onClick={() => setIsModalOpen(true)}>+ Add Expense</button>
+
+                    <AddExpenseModal 
+                        isOpen={isModalOpen} 
+                        onClose={() => setIsModalOpen(false)} 
+                        onSave={handleSaveExpense}
+                        participants={[{id: 1, name: 'Kasia'}]} />
                 </div>
+
                 <div className="stats-row">
                     <span>👤 3 participants</span>
                     <span>🧾 2 expenses</span>
