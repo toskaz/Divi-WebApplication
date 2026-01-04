@@ -7,30 +7,30 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
     const [payer, setPayer] = useState("You (You)");
     const firstRef = useRef(null);
     useEffect(() => {
-    if (isOpen) firstRef.current?.focus();
+        if (isOpen) firstRef.current?.focus();
     }, [isOpen]);
-    
-    const [splitType, setSplitType] = useState('equally'); 
+
+    const [splitType, setSplitType] = useState('equally');
     const [showExchangeRate, setShowExchangeRate] = useState(false);
 
     if (!isOpen) return null;
-    
+
     const handleSubmit = (e) => {
-        e.preventDefault(); 
+        e.preventDefault();
         onSave({
             amount,
             date,
             description,
             payer,
             splitType
-        }); 
-        // Czyścimy pola
+        });
+
         setAmount("");
         setDescription("");
     };
 
     return (
-        <div className="modal-overlay"  onClick={onClose}>
+        <div className="modal-overlay" onClick={onClose}>
             <div className="modal-container" onClick={(e) => e.stopPropagation()}>
                 <header className="modal-header">
                     <h2>Add Expense</h2>
@@ -42,10 +42,11 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
                         <div className="form-group">
                             <label>Amount <span className="required">*</span></label>
                             <div className="amount-input-wrapper">
-                                <input 
+                                <input
                                     ref={firstRef}
-                                    type="number" 
-                                    placeholder="500" 
+                                    autoFocus
+                                    type="number"
+                                    placeholder="500"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
                                     required
@@ -60,10 +61,10 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
 
                         <div className="form-group">
                             <label>Date</label>
-                            <input 
-                                type="date" 
-                                value={date} 
-                                onChange={(e) => setDate(e.target.value)} // Naprawia pisanie
+                            <input
+                                type="date"
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
                             />
                         </div>
                     </div>
@@ -90,11 +91,11 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
 
                     <div className="form-group">
                         <label>Description <span className="required">*</span></label>
-                        <input 
-                            type="text" 
-                            placeholder="Grocery Shopping" 
+                        <input
+                            type="text"
+                            placeholder="Grocery Shopping"
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)} // Naprawia pisanie
+                            onChange={(e) => setDescription(e.target.value)}
                             required
                         />
                     </div>
@@ -112,14 +113,14 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
                     <div className="form-group">
                         <label>For whom? <span className="required">*</span></label>
                         <div className="split-toggle">
-                            <button 
+                            <button
                                 type="button"
-                                className={splitType === 'equally' ? 'active' : ''} 
+                                className={splitType === 'equally' ? 'active' : ''}
                                 onClick={() => setSplitType('equally')}
                             >Split equally</button>
-                            <button 
+                            <button
                                 type="button"
-                                className={splitType === 'custom' ? 'active' : ''} 
+                                className={splitType === 'custom' ? 'active' : ''}
                                 onClick={() => setSplitType('custom')}
                             >Custom split</button>
                         </div>
@@ -140,7 +141,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
                             </div>
                             <div className="split-total-footer">
                                 <span>Split total:</span>
-                                <span className="valid">PLN zapłacone</span>
+                                <span className="valid">PLN paid</span>
                             </div>
                         </div>
                     )}

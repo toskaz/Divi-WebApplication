@@ -1,35 +1,35 @@
 import { useState } from "react";
 import logo from "../assets/logo.png";
 import "../styles/mainView.css";
-import CreateGroupModal from "../components/CreateGroupModel";
+import CreateGroupModal from "../components/CreateGroupModal";
 
 export default function MainView({ onLogout, onSelectGroup }) {
     const [showCreateGroup, setShowCreateGroup] = useState(false);
 
     function handleCreateGroup(data) {
         console.log("New group:", data);
-        alert("Group created.");
+        console.log("Group created.");
         setShowCreateGroup(false);
     }
 
-    return(
+    return (
         <>
             <header className="main-header">
                 <nav>
-                <div className="logo">
-                     <img src={logo} alt="Divi logo" />
-                </div>
-                <button className="logout-btn" onClick={onLogout}>Logout</button>
+                    <div className="logo">
+                        <img src={logo} alt="Divi logo" />
+                    </div>
+                    <button className="logout-btn" onClick={onLogout}>Logout</button>
                 </nav>
             </header>
 
             <main>
                 <div className="content-header">
                     <div className="title-section">
-                    <h1>My Groups</h1>
-                    <p>Manage your shared expenses</p>
+                        <h1>My Groups</h1>
+                        <p>Manage your shared expenses</p>
                     </div>
-                    <button className="create-group-btn"onClick={() => setShowCreateGroup(true)}>
+                    <button className="create-group-btn" onClick={() => setShowCreateGroup(true)}>
                         + New Group
                     </button>
                 </div>
@@ -76,7 +76,7 @@ export default function MainView({ onLogout, onSelectGroup }) {
             </main>
             {showCreateGroup && (
                 <CreateGroupModal
-                     onClose={() => setShowCreateGroup(false)}
+                    onClose={() => setShowCreateGroup(false)}
                     onCreate={handleCreateGroup}
                 />
             )}

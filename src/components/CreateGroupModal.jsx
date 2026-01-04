@@ -42,18 +42,18 @@ export default function CreateGroupModal({ onClose, onCreate }) {
     const name = pName.trim();
 
     if (!name) {
-      alert("Enter participant name.");
+      console.log("Enter participant name.");
       return;
     }
 
     if (!isEmailValid(email)) {
-      alert("Enter a valid email.");
+      console.log("Enter a valid email.");
       return;
     }
 
     const alreadyAdded = participants.some((p) => p.email.toLowerCase() === email);
     if (alreadyAdded) {
-      alert("This email is already added.");
+      console.log("This email is already added.");
       return;
     }
 
@@ -70,7 +70,7 @@ export default function CreateGroupModal({ onClose, onCreate }) {
     e.preventDefault();
 
     if (!groupName.trim()) {
-      alert("Enter group name.");
+      console.log("Enter group name.");
       return;
     }
 
@@ -99,6 +99,7 @@ export default function CreateGroupModal({ onClose, onCreate }) {
             <label>Group name *</label>
             <input
               ref={firstRef}
+              autoFocus
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="e.g. Weekend in the mountains"
