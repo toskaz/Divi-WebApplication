@@ -13,10 +13,10 @@ export default function Login({ goToRegister, onLogin }) {
         e.preventDefault();
 
         if (email === DEMO_EMAIL && password === DEMO_PASS) {
-            alert("Login success");
+            console.log("Login success");
             onLogin();
         } else {
-            alert("Wrong email or password");
+            console.log("Wrong email or password");
         }
     }
 
@@ -38,13 +38,13 @@ export default function Login({ goToRegister, onLogin }) {
 
                         <button type="button" className="tab" onClick={goToRegister}>
                             Register
-                        </button> 
+                        </button>
                     </div>
 
                     <form className="form" onSubmit={handleSubmit}>
                         <div className="field">
                             <label>Email address</label>
-                            <input 
+                            <input
                                 type="email"
                                 placeholder="test@divi.com"
                                 value={email}

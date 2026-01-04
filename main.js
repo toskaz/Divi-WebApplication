@@ -1,4 +1,3 @@
-/* global process */
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -11,40 +10,22 @@ function createWindow() {
     width: 1200,
     height: 800,
     show: false,
-    icon: path.join(__dirname, 'src/assets/logo.png'),
+    icon: path.join(__dirname, 'src/assets/logo_square.png'),
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true
     }
   });
 
   win.webContents.on('did-finish-load', () => {
     win.focus();
-    win.webContents.focus();
   });
 
-  const template = [
-    {
-      label: 'Edit',
-      submenu: [
-        { role: 'undo' }, { role: 'redo' }, { type: 'separator' },
-        { role: 'cut' }, { role: 'copy' }, { role: 'paste' },
-        { role: 'selectAll' }, { role: 'delete' }
-      ]
-    },
-    {
-      label: 'View',
-      submenu: [
-        { role: 'reload' }, { role: 'toggleDevTools' }
-      ]
-    }
-  ];
-
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
+  Menu.setApplicationMenu(null);
 
   win.loadURL('http://localhost:5173');
-  
+
   win.once('ready-to-show', () => {
     win.show();
     win.focus();
