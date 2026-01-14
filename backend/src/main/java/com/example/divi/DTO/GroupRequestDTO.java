@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class GropuRequrstDTO {
+public class GroupRequestDTO {
     private String groupName;
     private Long creatorId;
     private String currencyCode;

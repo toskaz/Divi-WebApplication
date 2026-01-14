@@ -1,6 +1,6 @@
 package com.example.divi.service;
 
-import com.example.divi.DTO.GropuRequrstDTO;
+import com.example.divi.DTO.GroupRequestDTO;
 import com.example.divi.model.Currency;
 import com.example.divi.model.Group;
 import com.example.divi.model.Membership;
@@ -28,7 +28,7 @@ public class GroupService {
     private MembershipRepository membershipRepository;
 
     @Transactional
-    public Group createGroup(GropuRequrstDTO groupRequest ){
+    public Group createGroup(GroupRequestDTO groupRequest ){
         User creator = userRepository.findById(groupRequest.getCreatorId()).orElseThrow(() -> new RuntimeException("User not found"));
         Currency currency = currencyService.getCurrency(groupRequest.getCurrencyCode());
 
