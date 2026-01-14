@@ -12,17 +12,19 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@IdClass(UserPaymentId.class)
 public class Split {
 
-    @Id
+    @EmbeddedId
+    private UserPaymentId id = new UserPaymentId();
+
     @ManyToOne
+    @MapsId("paymentId")
     @JoinColumn(name = "paymentId")
     @JsonIgnoreProperties("splits")
     private Payment payment;
 
-    @Id
     @ManyToOne
+    @MapsId("userId")
     @JoinColumn(name = "userId")
     @JsonIgnoreProperties("splits")
     private User user;
