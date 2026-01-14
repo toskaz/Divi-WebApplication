@@ -41,7 +41,8 @@ public class GroupService {
 
     private void addMemberToGroup(User user, Group group) {
         UserGroupId membershipId = new UserGroupId(user.getUserId(), group.getGroupId());
-        if (!membershipRepository.existsByUserAndGroup(user, group)) {
+
+        if (!membershipRepository.existsById(membershipId)) {
             Membership membership = new Membership();
             membership.setUser(user);
             membership.setGroup(group);
