@@ -19,13 +19,13 @@ public class Split {
 
     @ManyToOne
     @MapsId("paymentId")
-    @JoinColumn(name = "paymentId")
+    @JoinColumn(name = "payment_id")
     @JsonIgnoreProperties("splits")
     private Payment payment;
 
     @ManyToOne
     @MapsId("userId")
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     @JsonIgnoreProperties("splits")
     private User user;
 
