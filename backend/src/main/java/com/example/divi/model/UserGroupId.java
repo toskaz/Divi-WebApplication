@@ -21,7 +21,7 @@ public class UserGroupId implements Serializable {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "group_id")
+    @Column(name = "user_id")
     private Long groupId;
     
 }

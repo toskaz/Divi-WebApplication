@@ -11,4 +11,6 @@ public class GroupRequestDTO {
     private String currencyCode;
     private String description;
     private List<Long> memberIds;
+
+//    private List<GroupMemberDTO> members;
 }
