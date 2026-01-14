@@ -12,18 +12,23 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@IdClass(UserGroupId.class)
+//@IdClass(UserGroupId.class)
 public class Membership {
 
-    @Id
+    @EmbeddedId
+    private UserGroupId id = new UserGroupId();
+
+//    @Id
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
     @JsonIgnoreProperties("memberships")
     private User user;
 
-    @Id
+//    @Id
     @ManyToOne
-    @JoinColumn(name = "groupId")
+    @MapsId("groupId")
+    @JoinColumn(name = "group_id")
     @JsonIgnoreProperties("memberships")
     private Group group;
 

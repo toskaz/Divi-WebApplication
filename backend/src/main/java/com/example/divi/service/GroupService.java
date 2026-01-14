@@ -1,10 +1,7 @@
 package com.example.divi.service;
 
 import com.example.divi.DTO.GroupRequestDTO;
-import com.example.divi.model.Currency;
-import com.example.divi.model.Group;
-import com.example.divi.model.Membership;
-import com.example.divi.model.User;
+import com.example.divi.model.*;
 import com.example.divi.repository.GroupRepository;
 import com.example.divi.repository.MembershipRepository;
 import com.example.divi.repository.UserRepository;
@@ -16,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-@RequiredArgsConstructor
 public class GroupService {
     @Autowired
     private GroupRepository groupRepository;
@@ -44,6 +40,7 @@ public class GroupService {
     }
 
     private void addMemberToGroup(User user, Group group) {
+        UserGroupId membershipId = new UserGroupId(user.getUserId(), group.getGroupId());
         if (!membershipRepository.existsByUserAndGroup(user, group)) {
             Membership membership = new Membership();
             membership.setUser(user);
