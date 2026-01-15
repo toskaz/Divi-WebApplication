@@ -9,6 +9,7 @@ import lombok.*;
 
 @Entity
 @Data
+@Table(name = "currencies")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

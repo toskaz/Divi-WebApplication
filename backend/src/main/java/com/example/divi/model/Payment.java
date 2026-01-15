@@ -11,6 +11,7 @@ import lombok.*;
 
 @Entity
 @Data
+@Table(name = "payments")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

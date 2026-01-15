@@ -6,7 +6,6 @@ import com.example.divi.repository.GroupRepository;
 import com.example.divi.repository.MembershipRepository;
 import com.example.divi.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +23,7 @@ public class GroupService {
     private MembershipRepository membershipRepository;
 
     @Transactional
-    public Group createGroup(GroupRequestDTO groupRequest ){
+    public Group createGroup(GroupRequestDTO groupRequest ) {
         User creator = userRepository.findById(groupRequest.getCreatorId()).orElseThrow(() -> new RuntimeException("User not found"));
         Currency currency = currencyService.getCurrency(groupRequest.getCurrencyCode());
 

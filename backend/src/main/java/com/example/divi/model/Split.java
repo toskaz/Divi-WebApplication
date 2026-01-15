@@ -9,6 +9,7 @@ import lombok.*;
 
 @Entity
 @Data
+@Table(name = "splits")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

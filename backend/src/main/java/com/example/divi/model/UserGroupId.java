@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 
 @Embeddable
 public class UserGroupId implements Serializable {
-//    private Long user;
-//
-//    private Long group;
 
     @Column(name = "user_id")
     private Long userId;

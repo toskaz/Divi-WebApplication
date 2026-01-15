@@ -9,23 +9,21 @@ import lombok.*;
 
 @Entity
 @Data
+@Table(name = "memberships")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-//@IdClass(UserGroupId.class)
 public class Membership {
 
     @EmbeddedId
     private UserGroupId id = new UserGroupId();
 
-//    @Id
     @ManyToOne
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties("memberships")
     private User user;
 
-//    @Id
     @ManyToOne
     @MapsId("groupId")
     @JoinColumn(name = "group_id")

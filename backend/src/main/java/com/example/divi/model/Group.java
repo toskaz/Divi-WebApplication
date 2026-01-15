@@ -10,7 +10,7 @@ import lombok.*;
 
 @Entity
 @Data
-@Table(name = "[group]")
+@Table(name = "groups")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
