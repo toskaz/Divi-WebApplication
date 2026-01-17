@@ -1,12 +1,15 @@
 package com.example.divi.service;
 
 import com.example.divi.DTO.ExpenseRequestDTO;
+import com.example.divi.DTO.ExpenseResponseDTO;
 import com.example.divi.model.*;
 import com.example.divi.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +67,20 @@ public class ExpenseService {
         }
 
         return savedPayment;
+    }
+
+    public List<ExpenseResponseDTO> getExpensesByGroupId(Long groupId) {
+        List<Payment> payments = paymentRepository.findByGroup_GroupIdOrderByDateDesc(groupId);
+        return payments.stream().map(payment -> {
+            ExpenseResponseDTO expenseResponse = new ExpenseResponseDTO();
+            expenseResponse.setPaymentId(payment.getPaymentId());
+            expenseResponse.setDescription(payment.getDescription());
+            expenseResponse.setAmount(payment.getAmount());
+            expenseResponse.setCurrencyCode(payment.getCurrencyCode().getCurrencyCode());
+            expenseResponse.setPayerName(payment.getUser().getFullName());
+            expenseResponse.setDate(payment.getDate());
+            return expenseResponse;
+        }).toList();
     }
 
 }
