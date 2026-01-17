@@ -1,6 +1,7 @@
 package com.example.divi.service;
 
 import com.example.divi.DTO.BalanceDTO;
+import com.example.divi.DTO.SettlementDTO;
 import com.example.divi.model.Group;
 import com.example.divi.model.Membership;
 import com.example.divi.model.Payment;
@@ -66,4 +67,60 @@ public class BalanceService {
                 .map(BalanceDTO::getBalance)
                 .orElse(BigDecimal.ZERO);
     }
+
+    public List<SettlementDTO> getSettlementPlan(Long groupId) {
+        List<BalanceDTO> balances = calculateGroupBalances(groupId);
+
+        if (balances.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        String currency = balances.get(0).getCurrencyCode();
+
+        List<BalanceDTO> debtors = new ArrayList<>();
+        List<BalanceDTO> creditors = new ArrayList<>();
+
+        for (BalanceDTO b : balances) {
+            if (b.getBalance().compareTo(BigDecimal.ZERO) < 0) {
+                debtors.add(b);
+            } else if (b.getBalance().compareTo(BigDecimal.ZERO) > 0) {
+                creditors.add(b);
+            }
+        }
+
+        List<SettlementDTO> settlements = new ArrayList<>();
+        int debtIndex = 0;
+        int credIndex = 0;
+
+        while (debtIndex < debtors.size() && credIndex < creditors.size()) {
+            BalanceDTO debtor = debtors.get(debtIndex);
+            BalanceDTO creditor = creditors.get(credIndex);
+
+            BigDecimal debtAmount = debtor.getBalance().abs();
+            BigDecimal creditAmount = creditor.getBalance();
+
+            BigDecimal transferAmount = debtAmount.min(creditAmount);
+
+            settlements.add(new SettlementDTO(
+                    debtor.getUserId(), debtor.getFullName(),
+                    creditor.getUserId(), creditor.getFullName(),
+                    transferAmount, currency
+            ));
+
+
+            debtor.setBalance(debtor.getBalance().add(transferAmount));
+            creditor.setBalance(creditor.getBalance().subtract(transferAmount));
+
+            if (debtor.getBalance().abs().compareTo(new BigDecimal("0.01")) < 0) {
+                debtIndex++;
+            }
+
+            if (creditor.getBalance().abs().compareTo(new BigDecimal("0.01")) < 0) {
+                credIndex++;
+            }
+        }
+
+        return settlements;
+    }
+
 }
