@@ -13,4 +13,7 @@ public class ExpenseResponseDTO {
     private String currencyCode;
     private String payerName;
     private LocalDateTime date;
+
+    private BigDecimal yourShare;
+    private int involvedPeopleCount;
 }

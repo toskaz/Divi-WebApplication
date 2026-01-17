@@ -24,8 +24,8 @@ public class ExpenseController {
     }
 
     @GetMapping("/group/{groupId}")
-    public ResponseEntity<List<ExpenseResponseDTO>> getGroupExpenses(@PathVariable Long groupId) {
-        List<ExpenseResponseDTO> expenses = expenseService.getExpensesByGroupId(groupId);
+    public ResponseEntity<List<ExpenseResponseDTO>> getGroupExpenses(@PathVariable Long groupId,@RequestParam Long userId) {
+        List<ExpenseResponseDTO> expenses = expenseService.getExpensesByGroupId(groupId, userId);
         return ResponseEntity.ok(expenses);
     }
 

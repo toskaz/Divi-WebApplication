@@ -98,7 +98,8 @@ public class ExpenseService {
         return savedPayment;
     }
 
-    public List<ExpenseResponseDTO> getExpensesByGroupId(Long groupId) {
+    @Transactional
+    public List<ExpenseResponseDTO> getExpensesByGroupId(Long groupId, Long currentUserId) {
         List<Payment> payments = paymentRepository.findByGroup_GroupIdOrderByDateDesc(groupId);
         return payments.stream().map(payment -> {
             ExpenseResponseDTO expenseResponse = new ExpenseResponseDTO();
@@ -108,6 +109,20 @@ public class ExpenseService {
             expenseResponse.setCurrencyCode(payment.getCurrencyCode().getCurrencyCode());
             expenseResponse.setPayerName(payment.getUser().getFullName());
             expenseResponse.setDate(payment.getDate());
+            int count = (payment.getSplits() != null) ? payment.getSplits().size() : 0;
+            expenseResponse.setInvolvedPeopleCount(count);
+
+            BigDecimal myShare = BigDecimal.ZERO;
+
+            if (payment.getSplits() != null) {
+                myShare = payment.getSplits().stream()
+                        .filter(split -> split.getUser().getUserId().equals(currentUserId))
+                        .findFirst()
+                        .map(split -> split.getShareAmount())
+                        .orElse(BigDecimal.ZERO);
+            }
+            expenseResponse.setYourShare(myShare);
+
             return expenseResponse;
         }).toList();
     }
