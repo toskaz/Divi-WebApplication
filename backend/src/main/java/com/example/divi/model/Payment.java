@@ -62,7 +62,9 @@ public class Payment {
 
     @PrePersist
     protected void onCreate() {
-        this.date = LocalDateTime.now();
+        if (this.date == null) {
+            this.date = LocalDateTime.now();
+        }
     }
 
 }
