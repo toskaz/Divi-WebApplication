@@ -10,7 +10,7 @@ public class GroupRequestDTO {
     private Long creatorId;
     private String currencyCode;
     private String description;
-    private List<Long> memberIds;
+//    private List<Long> memberIds;
 
-//    private List<GroupMemberDTO> members;
+    private List<GroupMemberDTO> members;
 }

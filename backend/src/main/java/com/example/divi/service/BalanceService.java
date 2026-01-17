@@ -35,7 +35,7 @@ public class BalanceService {
         }
 
         for (Payment payment : group.getPayments()) {
-            BigDecimal totalAmount = payment.getAmount();
+            BigDecimal totalAmount = payment.getDefaultCurrencyAmount();
             Long payerId = payment.getUser().getUserId();
 
             balances.put(payerId, balances.getOrDefault(payerId, BigDecimal.ZERO).add(totalAmount));
@@ -56,5 +56,14 @@ public class BalanceService {
         });
 
         return result;
+    }
+    public BigDecimal getUserBalanceInGroup(Long userId, Long groupId) {
+        List<BalanceDTO> allBalances = calculateGroupBalances(groupId);
+
+        return allBalances.stream()
+                .filter(b -> b.getUserId().equals(userId))
+                .findFirst()
+                .map(BalanceDTO::getBalance)
+                .orElse(BigDecimal.ZERO);
     }
 }
