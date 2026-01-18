@@ -127,4 +127,35 @@ public class ExpenseService {
         }).toList();
     }
 
+
+    @Transactional
+    public void settleDebt(Long groupId, Long fromUserId, Long toUserId, BigDecimal amount) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+        User payer = userRepository.findById(fromUserId).orElseThrow(() -> new RuntimeException("Payer not found"));
+        User recipient = userRepository.findById(toUserId).orElseThrow(() -> new RuntimeException("Recipient not found"));
+
+        Payment payment = new Payment();
+        payment.setGroup(group);
+        payment.setUser(payer);
+        payment.setAmount(amount);
+        payment.setDefaultCurrencyAmount(amount);
+        payment.setCurrencyCode(group.getDefaultCurrency());
+        payment.setDescription("Settlement: " + payer.getFullName() + " -> " + recipient.getFullName());
+        payment.setDate(LocalDateTime.now());
+        payment.setIsExpense(false);
+        payment.setIsCustomRate(false);
+
+        Payment savedPayment = paymentRepository.save(payment);
+
+        Split split = new Split();
+        split.setPayment(savedPayment);
+        split.setUser(recipient);
+        split.setShareAmount(amount);
+        split.setShareDefaultCurrencyAmount(amount);
+
+        splitRepository.save(split);
+    }
+
 }

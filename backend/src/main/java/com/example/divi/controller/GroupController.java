@@ -3,6 +3,7 @@ package com.example.divi.controller;
 import com.example.divi.DTO.*;
 import com.example.divi.model.Group;
 import com.example.divi.service.BalanceService;
+import com.example.divi.service.ExpenseService;
 import com.example.divi.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,8 @@ public class GroupController {
     private GroupService groupService;
     @Autowired
     private BalanceService balanceService;
+    @Autowired
+    private ExpenseService expenseService;
 
     @PostMapping
     public ResponseEntity<Group> createGroup(@RequestBody GroupRequestDTO groupRequest) {
@@ -44,5 +47,19 @@ public class GroupController {
         List<SettlementDTO> plan = balanceService.getSettlementPlan(groupId);
         return ResponseEntity.ok(plan);
     }
+
+    @PostMapping("/{groupId}/settle")
+    public ResponseEntity<String> settleDebt(@PathVariable Long groupId, @RequestBody SettlementDTO settlementData) {
+        expenseService.settleDebt(groupId, settlementData.getFromUserId(), settlementData.getToUserId(), settlementData.getAmount());
+        return ResponseEntity.ok("Settlement recorded");
+    }
+
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<String> deleteGroup(@PathVariable Long groupId) {
+        groupService.deleteGroup(groupId);
+        return ResponseEntity.ok("Group deleted successfully");
+    }
+
+
 
 }

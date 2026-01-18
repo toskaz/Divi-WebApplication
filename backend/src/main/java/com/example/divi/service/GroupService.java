@@ -7,6 +7,7 @@ import com.example.divi.DTO.GroupSummaryDTO;
 import com.example.divi.model.*;
 import com.example.divi.repository.GroupRepository;
 import com.example.divi.repository.MembershipRepository;
+import com.example.divi.repository.PaymentRepository;
 import com.example.divi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ public class GroupService {
     private MembershipRepository membershipRepository;
     @Autowired
     private BalanceService balanceService;
+    @Autowired
+    private PaymentRepository paymentRepository;
 
 
     @Transactional
@@ -128,6 +131,18 @@ public class GroupService {
         }
 
         return groupDetailsDTO;
+    }
+
+    @Transactional
+    public void deleteGroup(Long groupId) {
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new RuntimeException("Group not found"));
+        List<Payment> payments = paymentRepository.findByGroup_GroupIdOrderByDateDesc(groupId);
+        paymentRepository.deleteAll(payments);
+
+        List<Membership> memberships = membershipRepository.findByGroup(group);
+        membershipRepository.deleteAll(memberships);
+
+        groupRepository.delete(group);
     }
 
 
