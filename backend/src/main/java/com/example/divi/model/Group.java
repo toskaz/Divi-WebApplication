@@ -3,7 +3,7 @@ package com.example.divi.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,12 +22,10 @@ public class Group {
 
     @ManyToOne
     @JoinColumn (name="defaultCurrency")
-    @JsonIgnoreProperties("groupsDefault")
     private Currency defaultCurrency;
 
     @ManyToOne
     @JoinColumn (name="currentCurrency")
-    @JsonIgnoreProperties("groupsCurrent")
     private Currency currentCurrency;
 
     @Column(length = 30, nullable = false)
@@ -41,7 +39,7 @@ public class Group {
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    @JsonIgnoreProperties("group")
+    @JsonIgnore
     private List<Membership> memberships;
     
     @OneToMany(
@@ -50,7 +48,7 @@ public class Group {
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    @JsonIgnoreProperties("group")
+    @JsonIgnore
     private List<Payment> payments;
 
     @PrePersist

@@ -2,7 +2,7 @@ package com.example.divi.model;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,29 +26,23 @@ public class Currency {
 
     @OneToMany(
             mappedBy = "defaultCurrency",
-            // cascade = CascadeType.REMOVE,
-            // orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    @JsonIgnoreProperties("defaultCurrency")
+    @JsonIgnore
     private List<Group> groupsDefault;
 
     @OneToMany(
             mappedBy = "currentCurrency",
-            // cascade = CascadeType.REMOVE,
-            // orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    @JsonIgnoreProperties("currentCurrency")
+    @JsonIgnore
     private List<Group> groupsCurrent;
     
     @OneToMany(
             mappedBy = "currencyCode",
-            // cascade = CascadeType.REMOVE,
-            // orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    @JsonIgnoreProperties("currency")
+    @JsonIgnore
     private List<Payment> payments;
 
 }

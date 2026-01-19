@@ -2,8 +2,6 @@ package com.example.divi.model;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,13 +19,11 @@ public class Membership {
     @ManyToOne
     @MapsId("userId")
     @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("memberships")
     private User user;
 
     @ManyToOne
     @MapsId("groupId")
     @JoinColumn(name = "group_id")
-    @JsonIgnoreProperties("memberships")
     private Group group;
 
     private LocalDateTime joinedAt;

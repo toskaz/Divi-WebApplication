@@ -2,8 +2,6 @@ package com.example.divi.model;
 
 import java.math.BigDecimal;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,13 +19,11 @@ public class Split {
     @ManyToOne
     @MapsId("paymentId")
     @JoinColumn(name = "payment_id")
-    @JsonIgnoreProperties("splits")
     private Payment payment;
 
     @ManyToOne
     @MapsId("userId")
     @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties("splits")
     private User user;
 
     @Column(precision = 10, scale = 2, nullable = false)

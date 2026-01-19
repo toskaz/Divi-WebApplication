@@ -3,7 +3,7 @@ package com.example.divi.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,7 +37,7 @@ public class User {
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    @JsonIgnoreProperties("user")
+    @JsonIgnore
     private List<Membership> memberships;
     
     @OneToMany(
@@ -46,7 +46,7 @@ public class User {
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    @JsonIgnoreProperties("user")
+    @JsonIgnore
     private List<Split> splits;
     
     @OneToMany(
@@ -55,7 +55,7 @@ public class User {
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    @JsonIgnoreProperties("user")
+    @JsonIgnore
     private List<Payment> payments;
 
     @PrePersist

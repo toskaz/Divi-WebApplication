@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+// import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,17 +24,16 @@ public class Payment {
 
     @ManyToOne
     @JoinColumn (name="groupId")
-    @JsonIgnoreProperties("payments")
+    // @JsonIgnoreProperties("payments")
     private Group group;
 
     @ManyToOne
     @JoinColumn (name="userId")
-    @JsonIgnoreProperties("payments")
+    // @JsonIgnoreProperties("payments")
     private User user;
 
     @ManyToOne
     @JoinColumn (name="currencyCode")
-    @JsonIgnoreProperties("payments")
     private Currency currencyCode;
 
     @Column(length = 50)
@@ -57,7 +57,7 @@ public class Payment {
             orphanRemoval = true,
             fetch = FetchType.LAZY
     )
-    @JsonIgnoreProperties("payment")
+    @JsonIgnore
     private List<Split> splits;
 
     @PrePersist
