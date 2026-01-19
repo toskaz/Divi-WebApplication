@@ -1,6 +1,5 @@
 package com.example.divi.controller;
 
-import com.example.divi.DTO.RegisterRequestDTO;
 import com.example.divi.model.User;
 import com.example.divi.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +14,6 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
-
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody RegisterRequestDTO request) {
-        User user = userService.createUser(request);
-        return ResponseEntity.ok(user);
-    }
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
