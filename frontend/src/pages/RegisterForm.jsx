@@ -2,24 +2,40 @@ import "../styles/auth.css";
 import logo from "../assets/logo.png";
 import {useState } from "react";
 
-export default function Register( { goToLogin}) {
+export default function Register({ goToLogin }) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
 
-
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
 
-        if (password !== confirm) {
-        alert("Passwords do not match!");
-        return;
+        try {
+            const response = await fetch("http://localhost:8080/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    password: password,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem("token", data.token);
+                goToLogin();
+            } else {
+                // const errorText = await response.json();
+                // alert("Wrong email or password");
+            }
+        } catch /* (error) */ {
+            // console.error("Network error:", error);
+            // alert("Could not connect to the server.");
         }
-
-        alert(`Registered successfully!`);
-
-        goToLogin();
     }
 
     return (

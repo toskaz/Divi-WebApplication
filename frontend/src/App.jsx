@@ -1,18 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Login from './pages/LoginForm';
 import Register from "./pages/RegisterForm";
 import MainView from "./pages/mainView";
 import GroupView from "./pages/groupView";
 
 function App() {
-  const [view, setView] = useState("login");
-
-
-  useEffect(() => {
-
-  }, [view]);
+  const [view, setView] = useState(() => {
+    const savedToken = localStorage.getItem("token");
+    return savedToken ? "main" : "login";
+  });
 
   const handleLogout = () => {
+    localStorage.removeItem("token");
     window.location.reload();
   };
 

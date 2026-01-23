@@ -6,17 +6,32 @@ export default function Login({ goToRegister, onLogin }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const DEMO_EMAIL = "test@gmail.com";
-    const DEMO_PASS = "test";
-
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
 
-        if (email === DEMO_EMAIL && password === DEMO_PASS) {
-            console.log("Login success");
-            onLogin();
-        } else {
-            console.log("Wrong email or password");
+        try {
+            const response = await fetch("http://localhost:8080/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem("token", data.token);
+                onLogin();
+            } else {
+                // const errorText = await response.json();
+                // alert("Wrong email or password");
+            }
+        } catch /* (error) */ {
+            // console.error("Network error:", error);
+            // alert("Could not connect to the server.");
         }
     }
 

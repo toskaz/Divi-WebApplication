@@ -4,10 +4,8 @@ import com.example.divi.DTO.RegisterRequestDTO;
 import com.example.divi.model.User;
 import com.example.divi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,7 +20,7 @@ public class UserService {
 
     public User registerUser(RegisterRequestDTO request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+            throw new RuntimeException("Email already exists");
         }
         User user = new User();
         user.setFullName(request.getName());

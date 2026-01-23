@@ -1,5 +1,7 @@
 package com.example.divi.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,7 +40,7 @@ public class AuthController {
     private final UserDetailsService userDetailsService;
 
     @PostMapping("/login")
-    public AuthResponseDTO login(@RequestBody LoginRequestDTO request) {
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginRequestDTO request) {
         try {
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
@@ -48,16 +50,19 @@ public class AuthController {
                 .loadUserByUsername(request.getEmail());
             String token = jwtService.generateToken(user);
 
-            return new AuthResponseDTO(token, "Login successful");
+            return ResponseEntity.ok(new AuthResponseDTO(token, "Login successful"));
         } catch (AuthenticationException e) {
-            return new AuthResponseDTO(null, "Invalid email or password");
+            return ResponseEntity.badRequest().body(new AuthResponseDTO(null, "Invalid email or password"));
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody RegisterRequestDTO request) {        
-        User user = userService.registerUser(request);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> register(@RequestBody RegisterRequestDTO request) {
+        try {
+            User user = userService.registerUser(request);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
-    
 }
