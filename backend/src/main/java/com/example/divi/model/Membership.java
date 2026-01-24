@@ -6,11 +6,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "memberships")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Membership {
 
     @EmbeddedId

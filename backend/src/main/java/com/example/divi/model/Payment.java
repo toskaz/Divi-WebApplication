@@ -2,20 +2,20 @@ package com.example.divi.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-// import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "payments")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Payment {
 
     @Id
@@ -24,12 +24,10 @@ public class Payment {
 
     @ManyToOne
     @JoinColumn (name="groupId")
-    // @JsonIgnoreProperties("payments")
     private Group group;
 
     @ManyToOne
     @JoinColumn (name="userId")
-    // @JsonIgnoreProperties("payments")
     private User user;
 
     @ManyToOne
@@ -58,7 +56,7 @@ public class Payment {
             fetch = FetchType.LAZY
     )
     @JsonIgnore
-    private List<Split> splits;
+    private List<Split> splits = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

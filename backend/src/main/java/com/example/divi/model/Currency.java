@@ -1,5 +1,6 @@
 package com.example.divi.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -8,11 +9,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "currencies")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Currency {
 
     @Id
@@ -29,20 +30,20 @@ public class Currency {
             fetch = FetchType.LAZY
     )
     @JsonIgnore
-    private List<Group> groupsDefault;
+    private List<Group> groupsDefault = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "currentCurrency",
             fetch = FetchType.LAZY
     )
     @JsonIgnore
-    private List<Group> groupsCurrent;
+    private List<Group> groupsCurrent = new ArrayList<>();
     
     @OneToMany(
             mappedBy = "currencyCode",
             fetch = FetchType.LAZY
     )
     @JsonIgnore
-    private List<Payment> payments;
+    private List<Payment> payments = new ArrayList<>();
 
 }

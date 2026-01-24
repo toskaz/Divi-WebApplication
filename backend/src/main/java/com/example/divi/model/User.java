@@ -1,6 +1,7 @@
 package com.example.divi.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,11 +10,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class User {
 
     @Id
@@ -38,7 +39,7 @@ public class User {
             fetch = FetchType.LAZY
     )
     @JsonIgnore
-    private List<Membership> memberships;
+    private List<Membership> memberships = new ArrayList<>();
     
     @OneToMany(
             mappedBy = "user",
@@ -47,7 +48,7 @@ public class User {
             fetch = FetchType.LAZY
     )
     @JsonIgnore
-    private List<Split> splits;
+    private List<Split> splits = new ArrayList<>();
     
     @OneToMany(
             mappedBy = "user",
@@ -56,7 +57,7 @@ public class User {
             fetch = FetchType.LAZY
     )
     @JsonIgnore
-    private List<Payment> payments;
+    private List<Payment> payments = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
