@@ -1,16 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "../assets/logo.png";
 import "../styles/mainView.css";
 import CreateGroupModal from "../components/CreateGroupModal";
 
 export default function MainView({ onLogout, onSelectGroup }) {
     const [showCreateGroup, setShowCreateGroup] = useState(false);
+    const [groups, setGroups] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    function handleCreateGroup(data) {
-        console.log("New group:", data);
-        console.log("Group created.");
-        setShowCreateGroup(false);
+    async function handleCreateGroup(formData) {
+        const token = localStorage.getItem("token");
+        console.log("Creating group with data:", formData);
+        try {
+            const response = await fetch("http://localhost:8080/api/groups", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                const newGroupSummary = await response.json();
+                setShowCreateGroup(false);
+
+                setGroups(prev => [...prev, newGroupSummary]);
+            } else {
+                // const errorData = await response.json();
+                // alert(errorData.error || "Failed to create group");
+            }
+        } catch /*(error)*/ {
+            // console.error("Connection error:", error);
+        }
     }
+
+    useEffect(() => {
+        const fetchGroups = async () => {
+            const token = localStorage.getItem("token");
+            try {
+                const response = await fetch("http://localhost:8080/api/groups/me", {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setGroups(data);
+                } else if (response.status === 401 || response.status === 403) {
+                    // onLogout();
+                } else {
+                    // console.error("Failed to fetch groups");
+                }
+            } catch /*(error)*/ {
+                // console.error("Network error:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGroups();
+    }, [onLogout]);
 
     return (
         <>
@@ -33,47 +86,31 @@ export default function MainView({ onLogout, onSelectGroup }) {
                         + New Group
                     </button>
                 </div>
+
                 <div className="groups-container">
-                    <article className="group-card" onClick={onSelectGroup}>
-                        <h2>Trip to Spain</h2>
-                        <p>Hotel and restaurant expenses</p>
-                        <div className="group-stats">
-                            <span>👤 5</span>
-                            <span>📅 2 days ago</span>
-                        </div>
-                        <div className="balance-overview">
-                            <span className="balance-label">Your Balance:</span>
-                            <span className="balance-amount positive">+$45.00</span>
-                        </div>
-                    </article>
-
-                    <article className="group-card" onClick={onSelectGroup}>
-                        <h2>Weekend Getaway</h2>
-                        <p>Cabin and groceries</p>
-                        <div className="group-stats">
-                            <span>👤 3</span>
-                            <span>📅 5 days ago</span>
-                        </div>
-                        <div className="balance-overview">
-                            <span className="balance-label">Your Balance:</span>
-                            <span className="balance-amount negative">-$20.00</span>
-                        </div>
-                    </article>
-
-                    <article className="group-card" onClick={onSelectGroup}>
-                        <h2>Office Party</h2>
-                        <p>Decorations and food</p>
-                        <div className="group-stats">
-                            <span>👤 7</span>
-                            <span>📅 1 week ago</span>
-                        </div>
-                        <div className="balance-overview">
-                            <span className="balance-label">Your Balance:</span>
-                            <span className="balance-amount positive">+$15.00</span>
-                        </div>
-                    </article>
+                    {loading ? (
+                        <p>Loading your groups...</p>
+                    ) : groups.length > 0 ? (
+                        groups.map((group) => (
+                            <article
+                                key={group.id}
+                                className="group-card"
+                                onClick={() => onSelectGroup(group.id)}
+                            >
+                                <h2>{group.groupName}</h2>
+                                <p>...</p>
+                                <div className="group-stats">
+                                    <span>👤 {group.memberCount || 0}</span>
+                                    <span>📅 {group.lastPaymentDate} days ago</span>
+                                </div>
+                            </article>
+                        ))
+                    ) : (
+                        <p>You haven't joined any groups yet.</p>
+                    )}
                 </div>
             </main>
+
             {showCreateGroup && (
                 <CreateGroupModal
                     onClose={() => setShowCreateGroup(false)}

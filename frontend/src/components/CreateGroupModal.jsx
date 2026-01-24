@@ -2,36 +2,15 @@ import { useEffect, useRef, useState } from "react";
 
 export default function CreateGroupModal({ onClose, onCreate }) {
   const [groupName, setGroupName] = useState("");
-  const [description, setDescription] = useState("");
-  const [currency, setCurrency] = useState("PLN");
+  const [currencyCode, setCurrencyCode] = useState("PLN");
   const firstRef = useRef(null);
+
+  const [pEmail, setPEmail] = useState("");
+  const [members, setMembers] = useState([]);
 
   useEffect(() => {
     firstRef.current?.focus();
   }, []);
-
-  const knownUsers = {
-    "tosia@gmail.com": "Tosia",
-    "kasia@gmail.com": "Kasia",
-    "test@gmail.com": "Test User",
-  };
-
-  const [participants, setParticipants] = useState([
-    { id: 1, name: "You", email: "you@email.com" },
-  ]);
-
-  const [pEmail, setPEmail] = useState("");
-  const [pName, setPName] = useState("");
-
-  function handleEmailChange(e) {
-    const email = e.target.value;
-    setPEmail(email);
-
-    const lower = email.trim().toLowerCase();
-    if (knownUsers[lower]) {
-      setPName(knownUsers[lower]);
-    }
-  }
 
   function isEmailValid(email) {
     return email.includes("@") && email.includes(".");
@@ -39,31 +18,24 @@ export default function CreateGroupModal({ onClose, onCreate }) {
 
   function addParticipant() {
     const email = pEmail.trim().toLowerCase();
-    const name = pName.trim();
-
-    if (!name) {
-      console.log("Enter participant name.");
-      return;
-    }
 
     if (!isEmailValid(email)) {
       console.log("Enter a valid email.");
       return;
     }
 
-    const alreadyAdded = participants.some((p) => p.email.toLowerCase() === email);
+    const alreadyAdded = members.some((p) => p.email.toLowerCase() === email);
     if (alreadyAdded) {
       console.log("This email is already added.");
       return;
     }
 
-    setParticipants([...participants, { id: Date.now(), name, email }]);
+    setMembers([...members, { id: Date.now(), email }]);
     setPEmail("");
-    setPName("");
   }
 
   function removeParticipant(id) {
-    setParticipants(participants.filter((p) => p.id !== id));
+    setMembers(members.filter((p) => p.id !== id));
   }
 
   function handleSubmit(e) {
@@ -76,9 +48,8 @@ export default function CreateGroupModal({ onClose, onCreate }) {
 
     onCreate({
       groupName: groupName.trim(),
-      description: description.trim(),
-      currency,
-      participants,
+      currencyCode,
+      members,
     });
 
     onClose();
@@ -108,19 +79,8 @@ export default function CreateGroupModal({ onClose, onCreate }) {
           </div>
 
           <div className="field">
-            <label>Description (optional)</label>
-            <textarea
-              className="textarea"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Gas and accommodation expenses"
-              rows={3}
-            />
-          </div>
-
-          <div className="field">
             <label>Currency *</label>
-            <select value={currency} onChange={(e) => setCurrency(e.target.value)} required>
+            <select value={currencyCode} onChange={(e) => setCurrencyCode(e.target.value)} required>
               <option value="PLN">PLN (złoty)</option>
               <option value="EUR">EUR (euro)</option>
               <option value="USD">USD (dollar)</option>
@@ -131,22 +91,19 @@ export default function CreateGroupModal({ onClose, onCreate }) {
             <label>Participants *</label>
 
             <div className="participantsBox">
-              {participants.map((p) => (
+              {members.map((p) => (
                 <div key={p.id} className="participantRow">
                   <div>
-                    <div className="pName">{p.name}</div>
-                    <div className="pEmail">{p.email}</div>
+                    <div className="pEmail"><strong>{p.email}</strong></div>
                   </div>
 
-                  {p.name !== "You" && (
-                    <button
-                      type="button"
-                      className="trashBtn"
-                      onClick={() => removeParticipant(p.id)}
-                    >
-                      🗑
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className="trashBtn"
+                    onClick={() => removeParticipant(p.id)}
+                  >
+                    🗑
+                  </button>
                 </div>
               ))}
 
@@ -154,12 +111,7 @@ export default function CreateGroupModal({ onClose, onCreate }) {
                 <input
                   placeholder="Email"
                   value={pEmail}
-                  onChange={handleEmailChange}
-                />
-                <input
-                  placeholder="Participant name"
-                  value={pName}
-                  onChange={(e) => setPName(e.target.value)}
+                  onChange={(e) => setPEmail(e.target.value)}
                 />
 
                 <button type="button" className="addLink" onClick={addParticipant}>

@@ -25,7 +25,7 @@ public class BalanceService {
 
     public List<BalanceDTO> calculateGroupBalances(Long groupId) {
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
+                .orElseThrow(() -> new RuntimeException("Group with ID '" + groupId + "' not found"));
 
         Map<Long, BigDecimal> balances = new HashMap<>();
         Map<Long, String> userNames = new HashMap<>();
@@ -58,6 +58,7 @@ public class BalanceService {
 
         return result;
     }
+
     public BigDecimal getUserBalanceInGroup(Long userId, Long groupId) {
         List<BalanceDTO> allBalances = calculateGroupBalances(groupId);
 

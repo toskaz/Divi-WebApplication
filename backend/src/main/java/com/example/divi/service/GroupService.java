@@ -11,6 +11,7 @@ import com.example.divi.repository.PaymentRepository;
 import com.example.divi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,9 +37,16 @@ public class GroupService {
 
 
     @Transactional
-    public Group createGroup(GroupRequestDTO groupRequest ) {
-        User creator = userRepository.findById(groupRequest.getCreatorId()).orElseThrow(() -> new RuntimeException("User not found"));
+    public GroupSummaryDTO createGroup(GroupRequestDTO groupRequest) {
+        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User creator = userRepository.findByEmail(currentEmail)
+            .orElseThrow(() -> new RuntimeException("Creator with email '" + currentEmail + "' not found"));
+
         Currency currency = currencyService.getCurrency(groupRequest.getCurrencyCode());
+
+        if (currency == null) {
+            throw new RuntimeException("Currency with code '" + groupRequest.getCurrencyCode() + "' not found");
+        }
 
         Group group = new Group();
         group.setGroupName(groupRequest.getGroupName());
@@ -57,7 +65,7 @@ public class GroupService {
             }
         }
 
-        return addedGroup;
+        return convertToSummaryDTO(addedGroup, creator);
     }
 
     private void addMemberToGroup(User user, Group group) {
@@ -67,43 +75,45 @@ public class GroupService {
             Membership membership = new Membership();
             membership.setUser(user);
             membership.setGroup(group);
-            membership.setJoinedAt(LocalDateTime.now());
             membershipRepository.save(membership);
+
+            group.getMemberships().add(membership);
         }
     }
 
-    public List<GroupSummaryDTO> getUserGroupsSummary(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public List<GroupSummaryDTO> getUserGroupsSummary() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email '" + email + "' not found"));
 
-        List<Membership> memberships = membershipRepository.findByUser(user);
+        List<Membership> memberships = membershipRepository.findByUser(currentUser);
 
         return memberships.stream()
-                .map(membership -> {
-                    Group group = membership.getGroup();
-
-                    BigDecimal balance = balanceService.getUserBalanceInGroup(userId, group.getGroupId());
-
-                    int memberCount = group.getMemberships() != null ? group.getMemberships().size() : 0;
-
-                    LocalDateTime lastPayment = null;
-                    if (group.getPayments() != null && !group.getPayments().isEmpty()) {
-                        lastPayment = group.getPayments().stream()
-                                .map(Payment::getDate)
-                                .max(Comparator.naturalOrder())
-                                .orElse(null);
-                    }
-
-                    return new GroupSummaryDTO(
-                            group.getGroupId(),
-                            group.getGroupName(),
-                            group.getDefaultCurrency().getCurrencyCode(),
-                            balance,
-                            lastPayment,
-                            memberCount
-                    );
-                })
+                .map(membership -> convertToSummaryDTO(membership.getGroup(), currentUser))
                 .collect(Collectors.toList());
+    }
+
+    private GroupSummaryDTO convertToSummaryDTO(Group group, User user) {
+        BigDecimal balance = balanceService.getUserBalanceInGroup(user.getUserId(), group.getGroupId());
+
+        int memberCount = group.getMemberships() != null ? group.getMemberships().size() : 0;
+
+        LocalDateTime lastPayment = null;
+        if (group.getPayments() != null && !group.getPayments().isEmpty()) {
+            lastPayment = group.getPayments().stream()
+                    .map(Payment::getDate)
+                    .max(Comparator.naturalOrder())
+                    .orElse(null);
+        }
+
+        return new GroupSummaryDTO(
+                group.getGroupId(),
+                group.getGroupName(),
+                group.getDefaultCurrency().getCurrencyCode(),
+                balance,
+                lastPayment,
+                memberCount
+        );
     }
 
     public GroupDetailsDTO getGroupDetails(Long groupId) {

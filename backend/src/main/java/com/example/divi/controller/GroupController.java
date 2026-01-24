@@ -1,7 +1,6 @@
 package com.example.divi.controller;
 
 import com.example.divi.DTO.*;
-import com.example.divi.model.Group;
 import com.example.divi.service.BalanceService;
 import com.example.divi.service.ExpenseService;
 import com.example.divi.service.GroupService;
@@ -23,8 +22,8 @@ public class GroupController {
     private ExpenseService expenseService;
 
     @PostMapping
-    public ResponseEntity<Group> createGroup(@RequestBody GroupRequestDTO groupRequest) {
-        Group addedGroup = groupService.createGroup(groupRequest);
+    public ResponseEntity<GroupSummaryDTO> createGroup(@RequestBody GroupRequestDTO groupRequest) {
+        GroupSummaryDTO addedGroup = groupService.createGroup(groupRequest);
         return ResponseEntity.ok(addedGroup);
     }
 
@@ -32,9 +31,10 @@ public class GroupController {
     public ResponseEntity<List<BalanceDTO>> getGroupBalances(@PathVariable Long groupId) {
         return ResponseEntity.ok(balanceService.calculateGroupBalances(groupId));
     }
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<GroupSummaryDTO>> getUserGroups(@PathVariable Long userId) {
-        return ResponseEntity.ok(groupService.getUserGroupsSummary(userId));
+
+    @GetMapping("/me")
+    public ResponseEntity<List<GroupSummaryDTO>> getMyGroups() {
+        return ResponseEntity.ok(groupService.getUserGroupsSummary());
     }
 
     @GetMapping("/details/{groupId}")
