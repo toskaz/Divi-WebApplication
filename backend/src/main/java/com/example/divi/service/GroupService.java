@@ -12,7 +12,6 @@ import com.example.divi.repository.PaymentRepository;
 import com.example.divi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +41,7 @@ public class GroupService {
     @Transactional
     public GroupSummaryDTO createGroup(GroupRequestDTO groupRequest) {
         String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User creator = userRepository.findByEmail(currentEmail)
-            .orElseThrow(() -> new RuntimeException("Creator with email '" + currentEmail + "' not found"));
+        User creator = userRepository.findByEmail(currentEmail).get();
 
         Currency currency = currencyService.getCurrencyByCode(groupRequest.getCurrencyCode());
 
@@ -86,8 +84,7 @@ public class GroupService {
 
     public List<GroupSummaryDTO> getUserGroupsSummary() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User with email '" + email + "' not found"));
+        User currentUser = userRepository.findByEmail(email).get();
 
         List<Membership> memberships = membershipRepository.findByUser(currentUser);
 
@@ -122,15 +119,7 @@ public class GroupService {
     }
 
     public GroupDetailsDTO getGroupDetails(Long groupId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group with ID " + groupId + " not found"));
-
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User with email '" + email + "' not found"));
-        if (!membershipRepository.existsById(new UserGroupId(currentUser.getUserId(), groupId))) {
-            throw new RuntimeException("You are not a member of the group with ID " + groupId);
-        }
+        Group group = groupRepository.findById(groupId).get();
 
         GroupDetailsDTO groupDetailsDTO = new GroupDetailsDTO();
         groupDetailsDTO.setGroupName(group.getGroupName());
@@ -157,14 +146,7 @@ public class GroupService {
 
     @Transactional
     public void deleteGroup(Long groupId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User with email '" + email + "' not found"));
-        if (!membershipRepository.existsById(new UserGroupId(currentUser.getUserId(), groupId))) {
-            throw new RuntimeException("You are not a member of the group with ID " + groupId);
-        }
-
-        Group group = groupRepository.findById(groupId).orElseThrow(() -> new RuntimeException("Group not found"));
+        Group group = groupRepository.findById(groupId).get();
         List<Payment> payments = paymentRepository.findByGroup_GroupIdOrderByDateDesc(groupId);
         paymentRepository.deleteAll(payments);
 
@@ -176,13 +158,8 @@ public class GroupService {
 
     public ExpenseContextDTO getExpenseContext(Long groupId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User with email '" + email + "' not found"));
-        if (!membershipRepository.existsById(new UserGroupId(currentUser.getUserId(), groupId))) {
-            throw new RuntimeException("You are not a member of the group with ID " + groupId);
-        }
-        Group group = groupRepository.findById(groupId)
-            .orElseThrow(() -> new RuntimeException("Group with ID " + groupId + " not found"));
+        User currentUser = userRepository.findByEmail(email).get();
+        Group group = groupRepository.findById(groupId).get();
 
         List<ExpenseContextDTO.ParticipantDTO> participants = group.getMemberships().stream()
             .map(m -> new ExpenseContextDTO.ParticipantDTO(m.getUser().getUserId(), m.getUser().getFullName()))

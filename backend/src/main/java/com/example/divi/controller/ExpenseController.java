@@ -6,6 +6,7 @@ import com.example.divi.model.Payment;
 import com.example.divi.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class ExpenseController {
         return ResponseEntity.ok(payment);
     }
 
+    @PreAuthorize("@groupSecurity.isMember(#groupId)")
     @GetMapping("/group/{groupId}")
     public ResponseEntity<List<ExpenseResponseDTO>> getGroupExpenses(@PathVariable Long groupId) {
         List<ExpenseResponseDTO> expenses = expenseService.getExpensesByGroupId(groupId);

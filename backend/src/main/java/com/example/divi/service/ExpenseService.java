@@ -107,8 +107,7 @@ public class ExpenseService {
     @Transactional
     public List<ExpenseResponseDTO> getExpensesByGroupId(Long groupId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User with email '" + email + "' not found"));
+        User currentUser = userRepository.findByEmail(email).get();
         List<Payment> payments = paymentRepository.findByGroup_GroupIdOrderByDateDesc(groupId);
         return payments.stream().map(payment -> {
             ExpenseResponseDTO expenseResponse = new ExpenseResponseDTO();
