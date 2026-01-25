@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.example.divi.model.User;
 import com.example.divi.repository.MembershipRepository;
 
 @Service("groupSecurity")
@@ -13,8 +14,8 @@ public class GroupSecurityService {
     private MembershipRepository membershipRepository;
 
     public boolean isMember(Long groupId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return membershipRepository.existsByUser_EmailAndGroup_GroupId(email, groupId);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return membershipRepository.existsByUser_UserIdAndGroup_GroupId(user.getUserId(), groupId);
     }
     
 }

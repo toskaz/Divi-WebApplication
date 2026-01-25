@@ -40,8 +40,7 @@ public class GroupService {
 
     @Transactional
     public GroupSummaryDTO createGroup(GroupRequestDTO groupRequest) {
-        String currentEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        User creator = userRepository.findByEmail(currentEmail).get();
+        User creator = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Currency currency = currencyService.getCurrencyByCode(groupRequest.getCurrencyCode());
 
@@ -83,8 +82,7 @@ public class GroupService {
     }
 
     public List<GroupSummaryDTO> getUserGroupsSummary() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).get();
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         List<Membership> memberships = membershipRepository.findByUser(currentUser);
 
@@ -157,8 +155,7 @@ public class GroupService {
     }
 
     public ExpenseContextDTO getExpenseContext(Long groupId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).get();
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Group group = groupRepository.findById(groupId).get();
 
         List<ExpenseContextDTO.ParticipantDTO> participants = group.getMemberships().stream()

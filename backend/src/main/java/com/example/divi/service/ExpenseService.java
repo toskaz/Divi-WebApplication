@@ -106,8 +106,7 @@ public class ExpenseService {
 
     @Transactional
     public List<ExpenseResponseDTO> getExpensesByGroupId(Long groupId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email).get();
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Payment> payments = paymentRepository.findByGroup_GroupIdOrderByDateDesc(groupId);
         return payments.stream().map(payment -> {
             ExpenseResponseDTO expenseResponse = new ExpenseResponseDTO();
