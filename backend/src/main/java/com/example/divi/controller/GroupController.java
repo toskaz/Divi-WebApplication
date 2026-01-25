@@ -60,6 +60,10 @@ public class GroupController {
         return ResponseEntity.ok("Group deleted successfully");
     }
 
-
+    @GetMapping("/{groupId}/expense-context")
+    public ResponseEntity<ExpenseContextDTO> getExpenseContext(@PathVariable Long groupId) {
+        ExpenseContextDTO expenseContext = groupService.getExpenseContext(groupId);
+        return ResponseEntity.ok(expenseContext);
+    }
 
 }

@@ -7,10 +7,11 @@ import com.example.divi.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -30,35 +31,44 @@ public class ExpenseService {
     @Transactional
     public Payment addExpense(ExpenseRequestDTO expenseRequest) {
         Group group = groupRepository.findById(expenseRequest.getGroupId())
-                .orElseThrow(() -> new RuntimeException("Group not found"));
+                .orElseThrow(() -> new RuntimeException("Group with ID " + expenseRequest.getGroupId() + " not found"));
 
         User payer = userRepository.findById(expenseRequest.getPayerId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User with ID " + expenseRequest.getPayerId() + " not found"));
 
-        Currency transactionCurrency = currencyService.getCurrency(expenseRequest.getCurrencyCode());
-        Currency groupCurrency = group.getDefaultCurrency();
-
-
-        BigDecimal rate = BigDecimal.ONE;
-        boolean isCustomRate = false;
-
-
-        if (!transactionCurrency.getCurrencyCode().equals(groupCurrency.getCurrencyCode())) {
-            if (expenseRequest.getExchangeRate() != null && expenseRequest.getExchangeRate().compareTo(BigDecimal.ZERO) > 0) {
-                rate = expenseRequest.getExchangeRate();
-                isCustomRate = true;
-            } else {
-                // TODO:Tutaj w przyszłości można dodać pobieranie kursu z API (np. NBP)
-                throw new RuntimeException("Exchange rate is required for different currencies ("
-                        + transactionCurrency.getCurrencyCode() + " -> " + groupCurrency.getCurrencyCode() + ")");
-            }
+        Currency groupDefaultCurrency = group.getDefaultCurrency();
+        Currency transactionCurrency = currencyService.getCurrencyByCode(expenseRequest.getCurrencyCode());
+        if (transactionCurrency == null) {
+            throw new RuntimeException("Currency with code '" + expenseRequest.getCurrencyCode() + "' not found");
         }
 
+        if (expenseRequest.getSplitDetails() == null || expenseRequest.getSplitDetails().isEmpty()) {
+            throw new RuntimeException("At least one split detail must be provided");
+        }
+
+        if (expenseRequest.getAmount() == null || expenseRequest.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Expense amount must be greater than zero");
+        }
+
+        if (expenseRequest.getSplitDetails().values().stream().reduce(BigDecimal.ZERO, BigDecimal::add).compareTo(expenseRequest.getAmount()) != 0) {
+            throw new RuntimeException("Sum of split amounts must equal the total expense amount");
+        }
+
+        BigDecimal rate = BigDecimal.ONE;
+        Boolean isCustomRate = expenseRequest.getIsCustomRate() != null ? expenseRequest.getIsCustomRate() : false;
+
+        if (!transactionCurrency.getCurrencyCode().equals(groupDefaultCurrency.getCurrencyCode())) {
+            if (isCustomRate) {
+                rate = expenseRequest.getExchangeRate();
+            } else {
+                rate = currencyService.getCurrentExchangeRate(transactionCurrency.getCurrencyCode(), groupDefaultCurrency.getCurrencyCode());
+            }
+        }
 
         Payment payment = new Payment();
         payment.setGroup(group);
         payment.setUser(payer);
-        payment.setCurrencyCode(transactionCurrency);
+        payment.setCurrency(transactionCurrency);
         payment.setDescription(expenseRequest.getDescription());
         payment.setAmount(expenseRequest.getAmount());
         payment.setIsExpense(true);
@@ -66,8 +76,6 @@ public class ExpenseService {
 
         if (expenseRequest.getDate() != null) {
             payment.setDate(expenseRequest.getDate());
-        } else {
-            payment.setDate(LocalDateTime.now());
         }
 
         BigDecimal amountInDefaultCurrency = expenseRequest.getAmount().multiply(rate);
@@ -78,35 +86,37 @@ public class ExpenseService {
 
         final BigDecimal finalRate = rate;
 
-        if (expenseRequest.getSplitDetails() != null) {
-            expenseRequest.getSplitDetails().forEach((userId, shareAmount) -> {
-                User debtor = userRepository.findById(userId)
-                        .orElseThrow(() -> new RuntimeException("User not found"));
+        expenseRequest.getSplitDetails().forEach((userId, shareAmount) -> {
+            User debtor = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User with ID " + userId + " not found"));
 
-                Split split = new Split();
-                split.setPayment(savedPayment);
-                split.setUser(debtor);
+            Split split = new Split();
+            split.setPayment(savedPayment);
+            split.setUser(debtor);
 
-                split.setShareAmount(shareAmount);
+            split.setShareAmount(shareAmount);
 
-                split.setShareDefaultCurrencyAmount(shareAmount.multiply(finalRate));
+            split.setShareDefaultCurrencyAmount(shareAmount.multiply(finalRate));
 
-                splitRepository.save(split);
-            });
-        }
+            splitRepository.save(split);
+        });
 
         return savedPayment;
     }
 
     @Transactional
-    public List<ExpenseResponseDTO> getExpensesByGroupId(Long groupId, Long currentUserId) {
+    public List<ExpenseResponseDTO> getExpensesByGroupId(Long groupId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email '" + email + "' not found"));
         List<Payment> payments = paymentRepository.findByGroup_GroupIdOrderByDateDesc(groupId);
         return payments.stream().map(payment -> {
             ExpenseResponseDTO expenseResponse = new ExpenseResponseDTO();
             expenseResponse.setPaymentId(payment.getPaymentId());
             expenseResponse.setDescription(payment.getDescription());
             expenseResponse.setAmount(payment.getAmount());
-            expenseResponse.setCurrencyCode(payment.getCurrencyCode().getCurrencyCode());
+            expenseResponse.setCurrencyCode(payment.getCurrency().getCurrencyCode());
+            expenseResponse.setCurrencySymbol(payment.getCurrency().getCurrencySymbol());
             expenseResponse.setPayerName(payment.getUser().getFullName());
             expenseResponse.setDate(payment.getDate());
             int count = (payment.getSplits() != null) ? payment.getSplits().size() : 0;
@@ -116,7 +126,7 @@ public class ExpenseService {
 
             if (payment.getSplits() != null) {
                 myShare = payment.getSplits().stream()
-                        .filter(split -> split.getUser().getUserId().equals(currentUserId))
+                        .filter(split -> split.getUser().getUserId().equals(currentUser.getUserId()))
                         .findFirst()
                         .map(split -> split.getShareAmount())
                         .orElse(BigDecimal.ZERO);
@@ -131,7 +141,7 @@ public class ExpenseService {
     @Transactional
     public void settleDebt(Long groupId, Long fromUserId, Long toUserId, BigDecimal amount) {
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
+                .orElseThrow(() -> new RuntimeException("Group with ID " + groupId + " not found"));
 
         User payer = userRepository.findById(fromUserId).orElseThrow(() -> new RuntimeException("Payer not found"));
         User recipient = userRepository.findById(toUserId).orElseThrow(() -> new RuntimeException("Recipient not found"));
@@ -141,9 +151,9 @@ public class ExpenseService {
         payment.setUser(payer);
         payment.setAmount(amount);
         payment.setDefaultCurrencyAmount(amount);
-        payment.setCurrencyCode(group.getDefaultCurrency());
+        payment.setCurrency(group.getDefaultCurrency());
         payment.setDescription("Settlement: " + payer.getFullName() + " -> " + recipient.getFullName());
-        payment.setDate(LocalDateTime.now());
+        payment.setDate(LocalDate.now());
         payment.setIsExpense(false);
         payment.setIsCustomRate(false);
 

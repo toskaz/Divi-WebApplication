@@ -1,5 +1,6 @@
 package com.example.divi.service;
 
+import com.example.divi.DTO.ExpenseContextDTO;
 import com.example.divi.DTO.GroupDetailsDTO;
 import com.example.divi.DTO.GroupMemberDTO;
 import com.example.divi.DTO.GroupRequestDTO;
@@ -11,11 +12,13 @@ import com.example.divi.repository.PaymentRepository;
 import com.example.divi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +45,7 @@ public class GroupService {
         User creator = userRepository.findByEmail(currentEmail)
             .orElseThrow(() -> new RuntimeException("Creator with email '" + currentEmail + "' not found"));
 
-        Currency currency = currencyService.getCurrency(groupRequest.getCurrencyCode());
+        Currency currency = currencyService.getCurrencyByCode(groupRequest.getCurrencyCode());
 
         if (currency == null) {
             throw new RuntimeException("Currency with code '" + groupRequest.getCurrencyCode() + "' not found");
@@ -98,7 +101,7 @@ public class GroupService {
 
         int memberCount = group.getMemberships() != null ? group.getMemberships().size() : 0;
 
-        LocalDateTime lastPayment = null;
+        LocalDate lastPayment = null;
         if (group.getPayments() != null && !group.getPayments().isEmpty()) {
             lastPayment = group.getPayments().stream()
                     .map(Payment::getDate)
@@ -106,24 +109,33 @@ public class GroupService {
                     .orElse(null);
         }
 
+        Integer lastPaymentDaysAgo = (lastPayment != null) ? (int) ChronoUnit.DAYS.between(lastPayment, LocalDate.now()) : null;
+
         return new GroupSummaryDTO(
                 group.getGroupId(),
                 group.getGroupName(),
                 group.getDefaultCurrency().getCurrencyCode(),
                 balance,
-                lastPayment,
+                lastPaymentDaysAgo,
                 memberCount
         );
     }
 
     public GroupDetailsDTO getGroupDetails(Long groupId) {
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
+                .orElseThrow(() -> new RuntimeException("Group with ID " + groupId + " not found"));
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email '" + email + "' not found"));
+        if (!membershipRepository.existsById(new UserGroupId(currentUser.getUserId(), groupId))) {
+            throw new RuntimeException("You are not a member of the group with ID " + groupId);
+        }
 
         GroupDetailsDTO groupDetailsDTO = new GroupDetailsDTO();
-        groupDetailsDTO.setGroupId(group.getGroupId());
         groupDetailsDTO.setGroupName(group.getGroupName());
         groupDetailsDTO.setCurrencyCode(group.getDefaultCurrency().getCurrencyCode());
+        groupDetailsDTO.setCurrencySymbol(group.getDefaultCurrency().getCurrencySymbol());
 
         groupDetailsDTO.setMemberCount(group.getMemberships() != null ? group.getMemberships().size() : 0);
 
@@ -145,6 +157,13 @@ public class GroupService {
 
     @Transactional
     public void deleteGroup(Long groupId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email '" + email + "' not found"));
+        if (!membershipRepository.existsById(new UserGroupId(currentUser.getUserId(), groupId))) {
+            throw new RuntimeException("You are not a member of the group with ID " + groupId);
+        }
+
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new RuntimeException("Group not found"));
         List<Payment> payments = paymentRepository.findByGroup_GroupIdOrderByDateDesc(groupId);
         paymentRepository.deleteAll(payments);
@@ -153,6 +172,44 @@ public class GroupService {
         membershipRepository.deleteAll(memberships);
 
         groupRepository.delete(group);
+    }
+
+    public ExpenseContextDTO getExpenseContext(Long groupId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User with email '" + email + "' not found"));
+        if (!membershipRepository.existsById(new UserGroupId(currentUser.getUserId(), groupId))) {
+            throw new RuntimeException("You are not a member of the group with ID " + groupId);
+        }
+        Group group = groupRepository.findById(groupId)
+            .orElseThrow(() -> new RuntimeException("Group with ID " + groupId + " not found"));
+
+        List<ExpenseContextDTO.ParticipantDTO> participants = group.getMemberships().stream()
+            .map(m -> new ExpenseContextDTO.ParticipantDTO(m.getUser().getUserId(), m.getUser().getFullName()))
+            .toList();
+
+        Long currentUserId = currentUser.getUserId();
+        String defaultCurrencyCode = group.getDefaultCurrency().getCurrencyCode();
+        String currentCurrencyCode = group.getCurrentCurrency().getCurrencyCode();
+        BigDecimal currentExchangeRate = BigDecimal.ONE;
+
+        if (!defaultCurrencyCode.equals(currentCurrencyCode)) {
+            currentExchangeRate = currencyService.getCurrentExchangeRate(currentCurrencyCode, defaultCurrencyCode);
+        }
+
+        List<String> availableCurrencyCodes = currencyService.getAllCurrencies().stream()
+            .map(Currency::getCurrencyCode)
+            .toList();
+
+
+        return new ExpenseContextDTO(
+            participants,
+            defaultCurrencyCode,
+            currentCurrencyCode,
+            currentExchangeRate,
+            availableCurrencyCodes,
+            currentUserId
+        );
     }
 
 

@@ -3,7 +3,7 @@ package com.example.divi.DTO;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Map;
 
 @Data
@@ -12,9 +12,10 @@ public class ExpenseRequestDTO {
     private BigDecimal amount;
     private String currencyCode;
     private BigDecimal exchangeRate;
+    private Boolean isCustomRate;
     private Long payerId;
     private Long groupId;
-    private LocalDateTime date;
+    private LocalDate date;
 
     private Map<Long, BigDecimal> splitDetails;
 }

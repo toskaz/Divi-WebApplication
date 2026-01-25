@@ -9,6 +9,7 @@ function App() {
     const savedToken = localStorage.getItem("token");
     return savedToken ? "main" : "login";
   });
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -37,15 +38,18 @@ function App() {
         <MainView
           key="view-main"
           onLogout={handleLogout}
-          onSelectGroup={() => setView("group")}
+          onSelectGroup={(id) => {
+            setSelectedGroupId(id);
+            setView("group");
+          }}
         />
       )}
 
       {view === "group" && (
         <GroupView
           key="view-group"
+          groupId={selectedGroupId}
           onBack={() => setView("main")}
-          onLogout={handleLogout}
         />
       )}
     </div>

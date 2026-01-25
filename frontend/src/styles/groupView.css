@@ -156,18 +156,18 @@
   color: var(--text-muted);
 }
 
-.expnese-amounts {
+.expense-amounts {
   text-align: right;
   display: flex;
   flex-direction: column;
 }
 
-.expnese-amounts .total {
+.expense-amounts .total {
   font-weight: 600;
   font-size: 1rem;
 }
 
-.expnese-amounts .your-share {
+.expense-amounts .your-share {
   color: var(--text-muted);
   font-size: 0.8rem;
 }

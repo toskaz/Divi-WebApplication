@@ -24,7 +24,7 @@ public class CurrencyController {
 
     @GetMapping("/rate")
     public ResponseEntity<Map<String, BigDecimal>> getRate(@RequestParam String from, @RequestParam String to) {
-        BigDecimal rate = currencyService.getExchangeRate(from, to);
+        BigDecimal rate = currencyService.getCurrentExchangeRate(from, to);
         return ResponseEntity.ok(Map.of("rate", rate));
     }
 

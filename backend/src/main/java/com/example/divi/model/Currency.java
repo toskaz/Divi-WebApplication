@@ -23,7 +23,7 @@ public class Currency {
     private String currencyName;
 
     @Column(length = 5, nullable = false)
-    private String symbol;
+    private String currencySymbol;
 
     @OneToMany(
             mappedBy = "defaultCurrency",
@@ -40,7 +40,7 @@ public class Currency {
     private List<Group> groupsCurrent = new ArrayList<>();
     
     @OneToMany(
-            mappedBy = "currencyCode",
+            mappedBy = "currency",
             fetch = FetchType.LAZY
     )
     @JsonIgnore

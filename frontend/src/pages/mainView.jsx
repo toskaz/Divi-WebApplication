@@ -93,15 +93,15 @@ export default function MainView({ onLogout, onSelectGroup }) {
                     ) : groups.length > 0 ? (
                         groups.map((group) => (
                             <article
-                                key={group.id}
+                                key={group.groupId}
                                 className="group-card"
-                                onClick={() => onSelectGroup(group.id)}
+                                onClick={() => onSelectGroup(group.groupId)}
                             >
                                 <h2>{group.groupName}</h2>
                                 <p>...</p>
                                 <div className="group-stats">
                                     <span>👤 {group.memberCount || 0}</span>
-                                    <span>📅 {group.lastPaymentDate} days ago</span>
+                                    <span>{group.lastPaymentDaysAgo !== null ? `📅 ${group.lastPaymentDaysAgo} days ago` : "No payments yet"}</span>
                                 </div>
                             </article>
                         ))

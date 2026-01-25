@@ -1,14 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddExpenseModal from "../components/addExpenseModal";
 import "../styles/groupView.css";
-export default function GroupView({ onBack }) {
+export default function GroupView({ groupId, onBack }) {
     const [activeTab, setActiveTab] = useState('history');
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [groupDetails, setGroupDetails] = useState(null);
+    const [expenses, setExpenses] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        const fetchData = async () => {
+            try {
+                console.log(`Sending request: http://localhost:8080/api/groups/details/${groupId}`)
+                const detailRes = await fetch(`http://localhost:8080/api/groups/details/${groupId}`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                const detailData = await detailRes.json();
+                setGroupDetails(detailData);
+
+                const expenseRes = await fetch(`http://localhost:8080/api/expenses/group/${groupId}`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                const expenseData = await expenseRes.json();
+                setExpenses(expenseData);
+                console.log("Fetched expenses:", expenseData);
+
+            } catch /*(error)*/ {
+                // console.error("Network error:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [groupId]);
 
     const handleSaveExpense = () => {
         setIsModalOpen(false);
         setActiveTab('history');
+        // TODO: Refresh expenses list?
     };
+
+    const handleDeleteGroup = () => {
+        if (!window.confirm("Are you sure you want to delete this group? This action cannot be undone.")) {
+            return;
+        }
+        const token = localStorage.getItem("token");
+        fetch(`http://localhost:8080/api/groups/${groupId}`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${token}` }
+        }).then(() => {
+            onBack();
+        });
+    };
+
+    if (loading) return <div className="loader">Loading group details...</div>;
+    if (!groupDetails) return <div className="error">Group not found.</div>;
 
     return(
         <>
@@ -16,24 +66,23 @@ export default function GroupView({ onBack }) {
                 <div className="back-btn" onClick={onBack}>← Back to groups</div>
 
                 <div className="title-bar">
-                    <h1>Trip to Spain</h1>
-                    <p>Hotel and restaurant expenses</p>
+                    <h1>{groupDetails.groupName}</h1>
                 </div>
                 <div className="action-btn">
-                    <button className="btn-delete">🗑️ Delete Group</button>
+                    <button className="btn-delete" onClick={handleDeleteGroup}>🗑️ Delete Group</button>
                     <button className="btn-add" onClick={() => setIsModalOpen(true)}>+ Add Expense</button>
 
-                    <AddExpenseModal 
-                        isOpen={isModalOpen} 
-                        onClose={() => setIsModalOpen(false)} 
+                    {isModalOpen && <AddExpenseModal
+                        onClose={() => setIsModalOpen(false)}
                         onSave={handleSaveExpense}
-                        participants={[{id: 1, name: 'Kasia'}]} />
+                        groupId={groupId}
+                        />}
                 </div>
 
                 <div className="stats-row">
-                    <span>👤 3 participants</span>
-                    <span>🧾 2 expenses</span>
-                    <span>💰 Total: $300.00</span>
+                    <span>👤 {groupDetails.memberCount} participants</span>
+                    <span>🧾 {groupDetails.expenseCount} expenses</span>
+                    <span>💰 Total: {groupDetails.totalExpenses} {groupDetails.currencySymbol}</span>
                 </div>
             </header>
 
@@ -58,37 +107,26 @@ export default function GroupView({ onBack }) {
                 {activeTab === 'history' && (
                   <section className="history-list">
                     <div className="date-group">
-                        <h3 className="date-label">August 15, 2024</h3>
-
-                        <article className="expense-card">
-                            <div className="expense-info">
-                                <div className="expense-icon">🧾</div>
-                                <div className="expense-details">
-                                    <h4>Dinner at La Casa</h4>
-                                    <span>👤 Paid by: Anna</span>
-                                    <p>Split between 3 people</p>
+                        {expenses.length === 0 && (
+                            <p>No expenses recorded yet.</p>
+                        )}
+                        {expenses.map((exp) => (
+                            <article className="expense-card" key={exp.paymentId}>
+                                <div className="expense-info">
+                                    <div className="expense-icon">🧾</div>
+                                    <div className="expense-details">
+                                        <h4>{exp.description}</h4>
+                                        <span>👤 Paid by: {exp.payerName}</span>
+                                        <p>Split between {exp.involvedPeopleCount} people</p>
+                                        <p>{new Date(exp.date).toLocaleDateString()}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="expnese-amounts">
-                                <span className="total">$100.00</span>
-                                <span className="your-share">$33.33</span>
-                            </div>                        
-                        </article>
-
-                        <article className="expense-card">
-                            <div className="expense-info">
-                                <div className="expense-icon">🧾</div>
-                                <div className="expense-details">
-                                    <h4>Hotel Room</h4>
-                                    <span>👤 Paid by: Ben</span>
-                                    <p>Split between 3 people</p>
+                                <div className="expense-amounts">
+                                    <span className="total">{exp.amount} {exp.currencyCode}</span>
+                                    <span className="your-share">{exp.yourShare > 0 ? `Your share: ${exp.yourShare} ${exp.currencySymbol}` : 'Not involved'}</span>
                                 </div>
-                            </div>
-                            <div className="expnese-amounts">
-                                <span className="total">$200.00</span>
-                                <span className="your-share">$66.67</span>
-                            </div>                        
-                        </article>
+                            </article>
+                        ))}
                     </div>
                   </section>
                 )}

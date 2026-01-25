@@ -1,33 +1,126 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function AddExpenseModal({ isOpen, onClose, onSave, participants }) {
+export default function AddExpenseModal({ onClose, onSave, groupId }) {
     const [amount, setAmount] = useState("");
-    const [date, setDate] = useState("2025-11-22");
+    const [currencyCode, setCurrencyCode] = useState("PLN");
+    const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
     const [description, setDescription] = useState("");
-    const [payer, setPayer] = useState("You (You)");
+    const [payerId, setPayerId] = useState("");
+    const [exchangeRate, setExchangeRate] = useState(1);
+    const [customExchangeRate, setCustomExchangeRate] = useState(false);
+    const [participants, setParticipants] = useState([]);
+    const [groupDefaultCurrencyCode, setGroupDefaultCurrencyCode] = useState("PLN");
+    const [availableCurrencyCodes, setAvailableCurrencyCodes] = useState([]);
+    const [splitType, setSplitType] = useState('equally');
+    const [splitDetails, setSplitDetails] = useState({});
+    const [currentUserId, setCurrentUserId] = useState("");
+
     const firstRef = useRef(null);
     useEffect(() => {
-        if (isOpen) firstRef.current?.focus();
-    }, [isOpen]);
+        firstRef.current?.focus();
+    }, []);
 
-    const [splitType, setSplitType] = useState('equally');
-    const [showExchangeRate, setShowExchangeRate] = useState(false);
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        const fetchContext = async () => {
+            const res = await fetch(`http://localhost:8080/api/groups/${groupId}/expense-context`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await res.json();
 
-    if (!isOpen) return null;
+            setParticipants(data.participants);
+            setGroupDefaultCurrencyCode(data.defaultCurrencyCode);
+            setCurrencyCode(data.currentCurrencyCode);
+            setExchangeRate(data.currentExchangeRate);
+            setAvailableCurrencyCodes(data.availableCurrencyCodes);
+            setCurrentUserId(data.currentUserId);
+            setPayerId(data.currentUserId);
+        };
+        fetchContext();
+    }, [groupId]);
 
-    const handleSubmit = (e) => {
+    const handleCurrencyChange = async (newCurrencyCode) => {
+        setCurrencyCode(newCurrencyCode);
+
+        if (newCurrencyCode === groupDefaultCurrencyCode) {
+            setExchangeRate(1);
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+        try {
+            const res = await fetch(`http://localhost:8080/api/currencies/rate?from=${newCurrencyCode}&to=${groupDefaultCurrencyCode}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await res.json();
+            setExchangeRate(data.rate);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleSplitChange = (userId, value) => {
+        setSplitDetails(prev => ({ ...prev, [userId]: value }));
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSave({
-            amount,
-            date,
-            description,
-            payer,
-            splitType
-        });
 
+        let finalSplitDetails = {};
+        const numericAmount = parseFloat(amount);
+        if (splitType === 'equally') {
+            const count = participants.length;
+            const equalShare = (numericAmount / count).toFixed(2);
+            participants.forEach(p => {
+                finalSplitDetails[p.id] = parseFloat(equalShare);
+            });
+        } else {
+            Object.keys(splitDetails).forEach(id => {
+                finalSplitDetails[id] = parseFloat(splitDetails[id] || 0);
+            });
+        }
+
+        const payload = {
+            description,
+            amount: numericAmount,
+            currencyCode,
+            exchangeRate: exchangeRate ? parseFloat(exchangeRate) : null,
+            payerId: parseInt(payerId),
+            groupId: parseInt(groupId),
+            date: date,
+            splitDetails: finalSplitDetails,
+            isCustomRate: customExchangeRate
+        }
+
+        try {
+            const response = await fetch("http://localhost:8080/api/expenses", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                onSave();
+                resetForm();
+            } else {
+                // const err = await response.json();
+                // alert("Error: " + (err.error || "Failed to add expense"));
+            }
+        } catch /*(error)*/ {
+            // console.error("Network error:", error);
+        }
+    };
+
+    const resetForm = () => {
         setAmount("");
         setDescription("");
-    };
+        setExchangeRate(1);
+        setSplitType('equally');
+        onClose();
+    }
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -46,15 +139,15 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
                                     ref={firstRef}
                                     autoFocus
                                     type="number"
-                                    placeholder="500"
+                                    placeholder="0.00"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
                                     required
                                 />
-                                <select className="currency-select">
-                                    <option>GBP</option>
-                                    <option>PLN</option>
-                                    <option>EUR</option>
+                                <select className="currency-select" value={currencyCode} onChange={(e) => handleCurrencyChange(e.target.value)}>
+                                    {availableCurrencyCodes.map(code => (
+                                        <option key={code} value={code}>{code}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -71,29 +164,36 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
 
                     <div className="exchange-rate-section">
                         <div className="rate-info">
-                            <span>Rate: 1 GBP ≈ 4.8220 PLN</span>
-                            <button type="button" className="btn-edit-rate" onClick={() => setShowExchangeRate(!showExchangeRate)}>
-                                ✎ Edit
+                            {groupDefaultCurrencyCode !== currencyCode && (
+                                <span>Rate: 1 {currencyCode} ≈ {exchangeRate} {groupDefaultCurrencyCode}</span>
+                            )}
+                            <button
+                                type="button"
+                                className="btn-edit-rate"
+                                onClick={() => setCustomExchangeRate(!customExchangeRate)}
+                                disabled={groupDefaultCurrencyCode === currencyCode}
+                                >
+                                {customExchangeRate ? "✖ Use real exchange rate" : "✎ Set Custom Exchange Rate"}
                             </button>
                         </div>
-                        {showExchangeRate && (
+                        {customExchangeRate && (
                             <div className="rate-edit-box">
                                 <label>Exchange Rate</label>
                                 <div className="rate-input">
-                                    <span>1 GBP =</span>
-                                    <input type="number" step="0.0001" defaultValue="4.8220" />
-                                    <span>PLN</span>
+                                    <span>1 {currencyCode} =</span>
+                                    <input type="number" step="0.0001" defaultValue={exchangeRate} onChange={(e) => setExchangeRate(e.target.value)} />
+                                    <span>{groupDefaultCurrencyCode}</span>
                                 </div>
                             </div>
                         )}
-                        <div className="total-converted">Total: {(parseFloat(amount || 0) * 4.822).toFixed(2)} PLN</div>
+                        <div className="total-converted">Total: {(parseFloat(amount || 0) * (exchangeRate)).toFixed(2)} {groupDefaultCurrencyCode}</div>
                     </div>
 
                     <div className="form-group">
                         <label>Description <span className="required">*</span></label>
                         <input
                             type="text"
-                            placeholder="Grocery Shopping"
+                            placeholder="e. g. Grocery Shopping"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             required
@@ -102,16 +202,15 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
 
                     <div className="form-group">
                         <label>Who paid? <span className="required">*</span></label>
-                        <select value={payer} onChange={(e) => setPayer(e.target.value)}>
-                            <option value="You (You)">You (You)</option>
+                        <select value={payerId} onChange={(e) => setPayerId(e.target.value)}>
                             {participants?.map(p => (
-                                <option key={p.id} value={p.name}>{p.name}</option>
+                                <option key={p.id} value={p.id}>{p.name + (p.id === currentUserId ? " (You)" : "")}</option>
                             ))}
                         </select>
                     </div>
 
                     <div className="form-group">
-                        <label>For whom? <span className="required">*</span></label>
+                        <label>Split Type<span className="required">*</span></label>
                         <div className="split-toggle">
                             <button
                                 type="button"
@@ -128,8 +227,28 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
 
                     {splitType === 'custom' && (
                         <div className="custom-split-list">
-                            <p className="split-hint">Splits shown in PLN</p>
-                            <div className="participant-row">
+                            {participants.map(p => (
+                                <div key={p.id} className="participant-row">
+                                    <label className="checkbox-container">
+                                        <input type="checkbox" defaultChecked />
+                                        {p.name + (p.id === currentUserId ? " (You)" : "")}
+                                    </label>
+                                    <div className="split-amount">
+                                        <input
+                                            type="number"
+                                            value={splitDetails[p.id] || 0}
+                                            onChange={(e) => handleSplitChange(p.id, e.target.value)}
+                                            />
+                                        <span>{groupDefaultCurrencyCode}</span>
+                                    </div>
+                                </div>
+                            ))}
+                            {/* <div className="split-total-footer">
+                                <span>Split total:</span>
+                                <span className="valid">PLN paid</span>
+                            </div> */}
+
+                            {/* <div className="participant-row">
                                 <label className="checkbox-container">
                                     <input type="checkbox" defaultChecked />
                                     You (You)
@@ -142,7 +261,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSave, participants 
                             <div className="split-total-footer">
                                 <span>Split total:</span>
                                 <span className="valid">PLN paid</span>
-                            </div>
+                            </div> */}
                         </div>
                     )}
 

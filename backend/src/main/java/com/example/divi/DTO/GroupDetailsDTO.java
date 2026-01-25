@@ -6,9 +6,9 @@ import java.math.BigDecimal;
 
 @Data
 public class GroupDetailsDTO {
-    private Long groupId;
     private String groupName;
     private String currencyCode;
+    private String currencySymbol;
     private BigDecimal totalExpenses;
     private int expenseCount;
     private int memberCount;

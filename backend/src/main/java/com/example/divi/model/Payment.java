@@ -1,6 +1,7 @@
 package com.example.divi.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class Payment {
 
     @ManyToOne
     @JoinColumn (name="currencyCode")
-    private Currency currencyCode;
+    private Currency currency;
 
     @Column(length = 50)
     private String description;
@@ -40,7 +41,7 @@ public class Payment {
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal amount;
 
-    private LocalDateTime date;
+    private LocalDate date;
 
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal defaultCurrencyAmount;
@@ -61,7 +62,7 @@ public class Payment {
     @PrePersist
     protected void onCreate() {
         if (this.date == null) {
-            this.date = LocalDateTime.now();
+            this.date = LocalDate.now();
         }
     }
 
