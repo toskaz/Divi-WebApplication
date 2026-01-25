@@ -53,7 +53,7 @@ public class BalanceService {
         }
         List<BalanceDTO> result = new ArrayList<>();
         balances.forEach((userId, amount) -> {
-            result.add(new BalanceDTO(userId, userNames.get(userId), amount, group.getDefaultCurrency().getCurrencyCode()));
+            result.add(new BalanceDTO(userId, userNames.get(userId), amount, group.getDefaultCurrency().getCurrencySymbol()));
         });
 
         return result;
@@ -76,7 +76,7 @@ public class BalanceService {
             return new ArrayList<>();
         }
 
-        String currency = balances.get(0).getCurrencyCode();
+        String currency = balances.get(0).getCurrencySymbol();
 
         List<BalanceDTO> debtors = new ArrayList<>();
         List<BalanceDTO> creditors = new ArrayList<>();

@@ -11,5 +11,5 @@ public class BalanceDTO {
     private Long userId;
     private String fullName;
     private BigDecimal balance;
-    private String currencyCode;
+    private String currencySymbol;
 }
