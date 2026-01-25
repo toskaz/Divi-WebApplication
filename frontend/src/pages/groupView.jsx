@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AddExpenseModal from "../components/addExpenseModal";
 import "../styles/groupView.css";
 export default function GroupView({ groupId, onBack }) {
@@ -9,39 +9,39 @@ export default function GroupView({ groupId, onBack }) {
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    const fetchData = useCallback(async () => {
+        setLoading(true);
         const token = localStorage.getItem("token");
+        try {
+            const [detailRes, expenseRes] = await Promise.all([
+                fetch(`http://localhost:8080/api/groups/details/${groupId}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            }),
+            fetch(`http://localhost:8080/api/expenses/group/${groupId}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            ]);
 
-        const fetchData = async () => {
-            try {
-                console.log(`Sending request: http://localhost:8080/api/groups/details/${groupId}`)
-                const detailRes = await fetch(`http://localhost:8080/api/groups/details/${groupId}`, {
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
-                const detailData = await detailRes.json();
-                setGroupDetails(detailData);
+            const detailData = await detailRes.json();
+            const expenseData = await expenseRes.json();
 
-                const expenseRes = await fetch(`http://localhost:8080/api/expenses/group/${groupId}`, {
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
-                const expenseData = await expenseRes.json();
-                setExpenses(expenseData);
-                console.log("Fetched expenses:", expenseData);
-
-            } catch /*(error)*/ {
-                // console.error("Network error:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+            setGroupDetails(detailData);
+            setExpenses(expenseData);
+        } catch /*(error)*/ {
+            // console.error("Network error:", error);
+        } finally {
+            setLoading(false);
+        }
     }, [groupId]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleSaveExpense = () => {
         setIsModalOpen(false);
         setActiveTab('history');
-        // TODO: Refresh expenses list?
+        fetchData();
     };
 
     const handleDeleteGroup = () => {
