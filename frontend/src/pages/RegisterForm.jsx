@@ -7,6 +7,8 @@ export default function Register({ goToLogin }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -84,24 +86,62 @@ export default function Register({ goToLogin }) {
 
                         <div className="field">
                             <label>Password</label>
-                            <input
-                                type="password"
-                                placeholder="******"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
+                            <div className="password-input-wrapper" style={{ position: 'relative' }}>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="********"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    style={{ width: '100%', paddingRight: '40px' }}
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '10px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {showPassword ? '🫣' : '👁️'}
+                                </button>
+                            </div>
                         </div>
 
                         <div className="field">
                             <label>Confirm password</label>
-                            <input
-                                type="password"
-                                placeholder="******"
-                                value={confirm}
-                                onChange={(e) => setConfirm(e.target.value)}
-                                required
-                            />
+                            <div className="password-input-wrapper" style={{ position: 'relative' }}>
+                                <input
+                                    type={showConfirm ? "text" : "password"}
+                                    placeholder="********"
+                                    value={confirm}
+                                    onChange={(e) => setConfirm(e.target.value)}
+                                    required
+                                    style={{ width: '100%', paddingRight: '40px' }}
+                                />
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
+                                    onClick={() => setShowConfirm(!showConfirm)}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '10px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {showConfirm ? '🫣' : '👁️'}
+                                </button>
+                            </div>
                         </div>
 
                         <button className="primary" type="submit">
