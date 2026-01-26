@@ -217,6 +217,11 @@
   border-color: #fee2e2;
 }
 
+.balance-card.neutral {
+  background-color: var(--info-bg);
+  border-color: #e0e7ff;
+}
+
 .status-icon {
   margin-right: 15px;
   font-size: 1.2rem;

@@ -9,6 +9,10 @@ export default function GroupView({ groupId, onBack }) {
     const [expenses, setExpenses] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const [balances, setBalances] = useState([]);
+    const [loadingBalances, setLoadingBalances] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState(null);
+
     const fetchData = useCallback(async () => {
         setLoading(true);
         const token = localStorage.getItem("token");
@@ -27,6 +31,7 @@ export default function GroupView({ groupId, onBack }) {
 
             setGroupDetails(detailData);
             setExpenses(expenseData);
+            setCurrentUserId(detailData.currentUserId);
         } catch /*(error)*/ {
             // console.error("Network error:", error);
         } finally {
@@ -37,6 +42,29 @@ export default function GroupView({ groupId, onBack }) {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    const fetchBalances = useCallback(async () => {
+        const token = localStorage.getItem("token");
+        setLoadingBalances(true);
+        try {
+            const res = await fetch(`http://localhost:8080/api/groups/${groupId}/balances`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await res.json();
+            setBalances(data);
+            console.log("Fetched balances:", data);
+        } catch (error) {
+            console.error("Failed to fetch balances:", error);
+        } finally {
+            setLoadingBalances(false);
+        }
+    }, [groupId]);
+
+    useEffect(() => {
+        if (activeTab === 'balances') {
+            fetchBalances();
+        }
+    }, [activeTab, fetchBalances]);
 
     const handleSaveExpense = () => {
         setIsModalOpen(false);
@@ -76,6 +104,7 @@ export default function GroupView({ groupId, onBack }) {
                         onClose={() => setIsModalOpen(false)}
                         onSave={handleSaveExpense}
                         groupId={groupId}
+                        currentUserId={currentUserId}
                         />}
                 </div>
 
@@ -137,34 +166,44 @@ export default function GroupView({ groupId, onBack }) {
                             <h2>How to read balances?</h2>
                             <p>Positive balance (green) mean others owe you money. Negative balance (red) mean you owe others.</p>
                         </div>
-                        <article className="balance-card positive">
-                            <div className="status-icon">📈</div>
-                            <div className="user-details">
-                                <strong>You</strong>
-                                <span className="status-label">is owed</span>
-                            </div>
-                            <span className="balance-amount">+$45.00</span>
-                        </article>
 
-                        <article className="balance-card negative">
-                            <div className="status-icon">📉</div>
-                            <div className="user-details">
-                                <strong>Ben</strong>
-                                <span className="status-label">owes you</span>
-                            </div>
-                            <span className="balance-amount">-$60.00</span>
-                        </article>
-
-                        <article className="balance-card positive">
-                            <div className="status-icon">📈</div>
-                            <div className="user-details">
-                                <strong>Anna</strong>
-                                <span className="status-label">is owed</span>
-                            </div>
-                            <span className="balance-amount">+$15.00</span>
-                        </article>
+                        {loadingBalances ? (
+                            <div className="mini-loader">Calculating balances...</div>
+                        ) : (
+                            balances.map((b) => {
+                                const isPositive = b.balance >= 0;
+                                let balanceCard;
+                                let statusLabel;
+                                let statusIcon;
+                                if (b.balance > 0) {
+                                    balanceCard = "positive";
+                                    statusLabel = "is owed";
+                                    statusIcon = "📈";
+                                } else if (b.balance < 0) {
+                                    balanceCard = "negative";
+                                    statusLabel = "owes";
+                                    statusIcon = "📉";
+                                } else {
+                                    balanceCard = "neutral";
+                                    statusLabel = "is settled";
+                                    statusIcon = "⚖️";
+                                }
+                                return (
+                                    <article key={b.userId} className={`balance-card ${balanceCard}`} >
+                                        <div className="status-icon">{statusIcon}</div>
+                                        <div className="user-details">
+                                            <strong>{b.fullName + (b.userId === currentUserId ? ' (You)' : '')}</strong>
+                                            <span className="status-label">{statusLabel}</span>
+                                        </div>
+                                        <span className="balance-amount">
+                                            {isPositive ? '+' : ''}{b.balance.toFixed(2)} {groupDetails.currencySymbol}
+                                        </span>
+                                    </article>
+                                );
+                            })
+                        )}
                     </section>
-                )}  
+                )}
 
                 {activeTab === 'settled' && (
                     <section className="settlement-guide">

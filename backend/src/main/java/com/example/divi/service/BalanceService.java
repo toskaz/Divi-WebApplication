@@ -24,8 +24,7 @@ public class BalanceService {
     private GroupRepository groupRepository;
 
     public List<BalanceDTO> calculateGroupBalances(Long groupId) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group with ID '" + groupId + "' not found"));
+        Group group = groupRepository.findById(groupId).get();
 
         Map<Long, BigDecimal> balances = new HashMap<>();
         Map<Long, String> userNames = new HashMap<>();
@@ -41,16 +40,14 @@ public class BalanceService {
 
             balances.put(payerId, balances.getOrDefault(payerId, BigDecimal.ZERO).add(totalAmount));
 
-
             for (Split split : payment.getSplits()) {
                 Long debtorId = split.getUser().getUserId();
-                BigDecimal splitAmount = split.getShareAmount();
+                BigDecimal splitAmount = split.getShareDefaultCurrencyAmount();
 
                 balances.put(debtorId, balances.getOrDefault(debtorId, BigDecimal.ZERO).subtract(splitAmount));
             }
-
-
         }
+
         List<BalanceDTO> result = new ArrayList<>();
         balances.forEach((userId, amount) -> {
             result.add(new BalanceDTO(userId, userNames.get(userId), amount, group.getDefaultCurrency().getCurrencySymbol()));

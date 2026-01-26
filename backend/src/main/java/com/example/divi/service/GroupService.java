@@ -118,11 +118,13 @@ public class GroupService {
 
     public GroupDetailsDTO getGroupDetails(Long groupId) {
         Group group = groupRepository.findById(groupId).get();
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         GroupDetailsDTO groupDetailsDTO = new GroupDetailsDTO();
         groupDetailsDTO.setGroupName(group.getGroupName());
         groupDetailsDTO.setCurrencyCode(group.getDefaultCurrency().getCurrencyCode());
         groupDetailsDTO.setCurrencySymbol(group.getDefaultCurrency().getCurrencySymbol());
+        groupDetailsDTO.setCurrentUserId(currentUser.getUserId());
 
         groupDetailsDTO.setMemberCount(group.getMemberships() != null ? group.getMemberships().size() : 0);
 

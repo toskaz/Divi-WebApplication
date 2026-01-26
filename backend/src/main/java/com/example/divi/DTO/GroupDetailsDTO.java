@@ -12,4 +12,5 @@ public class GroupDetailsDTO {
     private BigDecimal totalExpenses;
     private int expenseCount;
     private int memberCount;
+    private Long currentUserId;
 }

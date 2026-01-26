@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function AddExpenseModal({ onClose, onSave, groupId }) {
+export default function AddExpenseModal({ onClose, onSave, groupId, currentUserId }) {
     const [amount, setAmount] = useState("");
     const [currencyCode, setCurrencyCode] = useState("PLN");
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -13,7 +13,6 @@ export default function AddExpenseModal({ onClose, onSave, groupId }) {
     const [availableCurrencyCodes, setAvailableCurrencyCodes] = useState([]);
     const [splitType, setSplitType] = useState('equally');
     const [splitDetails, setSplitDetails] = useState({});
-    const [currentUserId, setCurrentUserId] = useState("");
 
     const firstRef = useRef(null);
     useEffect(() => {
@@ -33,7 +32,6 @@ export default function AddExpenseModal({ onClose, onSave, groupId }) {
             setCurrencyCode(data.currentCurrencyCode);
             setExchangeRate(data.currentExchangeRate);
             setAvailableCurrencyCodes(data.availableCurrencyCodes);
-            setCurrentUserId(data.currentUserId);
             setPayerId(data.currentUserId);
         };
         fetchContext();
@@ -243,25 +241,6 @@ export default function AddExpenseModal({ onClose, onSave, groupId }) {
                                     </div>
                                 </div>
                             ))}
-                            {/* <div className="split-total-footer">
-                                <span>Split total:</span>
-                                <span className="valid">PLN paid</span>
-                            </div> */}
-
-                            {/* <div className="participant-row">
-                                <label className="checkbox-container">
-                                    <input type="checkbox" defaultChecked />
-                                    You (You)
-                                </label>
-                                <div className="split-amount">
-                                    <input type="number" defaultValue="320" />
-                                    <span>PLN</span>
-                                </div>
-                            </div>
-                            <div className="split-total-footer">
-                                <span>Split total:</span>
-                                <span className="valid">PLN paid</span>
-                            </div> */}
                         </div>
                     )}
 
