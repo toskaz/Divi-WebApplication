@@ -67,11 +67,7 @@ export default function AddExpenseModal({ onClose, onSave, groupId, currentUserI
         let finalSplitDetails = {};
         const numericAmount = parseFloat(amount);
         if (splitType === 'equally') {
-            const count = participants.length;
-            const equalShare = (numericAmount / count).toFixed(2);
-            participants.forEach(p => {
-                finalSplitDetails[p.id] = parseFloat(equalShare);
-            });
+            finalSplitDetails = null;
         } else {
             Object.keys(splitDetails).forEach(id => {
                 finalSplitDetails[id] = parseFloat(splitDetails[id] || 0);

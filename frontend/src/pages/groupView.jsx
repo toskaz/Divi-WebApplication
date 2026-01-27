@@ -128,7 +128,7 @@ export default function GroupView({ groupId, onBack }) {
 
                 <button 
                     className={`tab-btn ${activeTab === 'settled' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('settled')}  > How to settle?
+                    onClick={() => setActiveTab('settling')}  > How to settle?
                 </button>
             </nav>
 
@@ -205,7 +205,7 @@ export default function GroupView({ groupId, onBack }) {
                     </section>
                 )}
 
-                {activeTab === 'settled' && (
+                {activeTab === 'settling' && (
                     <section className="settlement-guide">
                         <div className="info-box blue">
                             <h2>How does it work?</h2>
