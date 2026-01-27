@@ -180,9 +180,7 @@ public class ExpenseService {
 
     @Transactional
     public void settleDebt(Long groupId, Long fromUserId, Long toUserId, BigDecimal amount) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group with ID " + groupId + " not found"));
-
+        Group group = groupRepository.findById(groupId).get();
         User payer = userRepository.findById(fromUserId).orElseThrow(() -> new RuntimeException("Payer not found"));
         User recipient = userRepository.findById(toUserId).orElseThrow(() -> new RuntimeException("Recipient not found"));
 
