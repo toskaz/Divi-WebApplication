@@ -30,27 +30,27 @@ public class BalanceServiceTest {
     private BalanceService balanceService;
 
     private Group group;
-    private User userA;
-    private User userB;
-    private User userC;
+    private User userMati;
+    private User userKasia;
+    private User userTosia;
     private Currency usd;
 
     @BeforeEach
     void setUp() {
         usd = new Currency("USD", "US Dollar", "$", null, null, null);
 
-        userA = new User(); userA.setUserId(1L); userA.setFullName("Mati");
-        userB = new User(); userB.setUserId(2L); userB.setFullName("Kasia");
-        userC = new User(); userC.setUserId(3L); userC.setFullName("Tosia");
+        userMati = new User(); userMati.setUserId(1L); userMati.setFullName("Mati");
+        userKasia = new User(); userKasia.setUserId(2L); userKasia.setFullName("Kasia");
+        userTosia = new User(); userTosia.setUserId(3L); userTosia.setFullName("Tosia");
 
         group = new Group();
         group.setGroupId(100L);
         group.setDefaultCurrency(usd);
         group.setPayments(new ArrayList<>());
         
-        Membership m1 = new Membership(); m1.setUser(userA); m1.setGroup(group);
-        Membership m2 = new Membership(); m2.setUser(userB); m2.setGroup(group);
-        Membership m3 = new Membership(); m3.setUser(userC); m3.setGroup(group);
+        Membership m1 = new Membership(); m1.setUser(userMati); m1.setGroup(group);
+        Membership m2 = new Membership(); m2.setUser(userKasia); m2.setGroup(group);
+        Membership m3 = new Membership(); m3.setUser(userTosia); m3.setGroup(group);
         group.setMemberships(Arrays.asList(m1, m2, m3));
     }
 
@@ -59,15 +59,15 @@ public class BalanceServiceTest {
     void testCalculateBalances_SimpleDebt() {
 
         Payment payment = new Payment();
-        payment.setUser(userA);
+        payment.setUser(userMati);
         payment.setDefaultCurrencyAmount(new BigDecimal("50.00"));
         
         Split splitA = new Split(); 
-        splitA.setUser(userA); 
+        splitA.setUser(userMati); 
         splitA.setShareDefaultCurrencyAmount(new BigDecimal("25.00"));
 
         Split splitB = new Split(); 
-        splitB.setUser(userB); 
+        splitB.setUser(userKasia); 
         splitB.setShareDefaultCurrencyAmount(new BigDecimal("25.00"));
 
         payment.setSplits(Arrays.asList(splitA, splitB));
@@ -77,30 +77,30 @@ public class BalanceServiceTest {
         List<BalanceDTO> results = balanceService.calculateGroupBalances(100L);
 
         BalanceDTO balanceMati = results.stream()
-                .filter(b -> b.getUserId().equals(userB.getUserId()))
+                .filter(b -> b.getUserId().equals(userMati.getUserId()))
                 .findFirst().orElseThrow();
 
         BalanceDTO balanceKasia = results.stream()
-                .filter(b -> b.getUserId().equals(userA.getUserId()))
+                .filter(b -> b.getUserId().equals(userKasia.getUserId()))
                 .findFirst().orElseThrow();
 
-        assertEquals(0, new BigDecimal("-25.00").compareTo(balanceMati.getBalance()), "Bob should owe 25.00");
-        assertEquals(0, new BigDecimal("25.00").compareTo(balanceKasia.getBalance()), "Alice should be owed 25.00");
+        assertEquals(0, new BigDecimal("-25.00").compareTo(balanceMati.getBalance()), "Mati should owe 25.00");
+        assertEquals(0, new BigDecimal("25.00").compareTo(balanceKasia.getBalance()), "Kasia should be owed 25.00");
     }
 
     // test2: dlug miedzy A->B i B->C to A->C
     @Test
     void testGetSettlementPlan_GeneratesCorrectTransfers() {
         Payment p1 = new Payment();
-        p1.setUser(userB); 
+        p1.setUser(userKasia); 
         p1.setDefaultCurrencyAmount(new BigDecimal("10.00"));
-        Split s1 = new Split(); s1.setUser(userA); s1.setShareDefaultCurrencyAmount(new BigDecimal("10.00"));
+        Split s1 = new Split(); s1.setUser(userMati); s1.setShareDefaultCurrencyAmount(new BigDecimal("10.00"));
         p1.setSplits(Arrays.asList(s1));
 
         Payment p2 = new Payment();
-        p2.setUser(userC);
+        p2.setUser(userTosia);
         p2.setDefaultCurrencyAmount(new BigDecimal("10.00"));
-        Split s2 = new Split(); s2.setUser(userB); s2.setShareDefaultCurrencyAmount(new BigDecimal("10.00"));
+        Split s2 = new Split(); s2.setUser(userKasia); s2.setShareDefaultCurrencyAmount(new BigDecimal("10.00"));
         p2.setSplits(Arrays.asList(s2));
 
         group.getPayments().addAll(Arrays.asList(p1, p2));
@@ -112,9 +112,9 @@ public class BalanceServiceTest {
         
         SettlementDTO transfer = settlements.get(0);
         
-        assertEquals(userA.getUserId(), transfer.getFromUserId(), "Alice should be the payer");
+        assertEquals(userMati.getUserId(), transfer.getFromUserId(), "Mati should be the payer");
         
-        assertEquals(userC.getUserId(), transfer.getToUserId(), "Charlie should be the recipient");
+        assertEquals(userTosia.getUserId(), transfer.getToUserId(), "Tosia should be the recipient");
         
         assertEquals(0, new BigDecimal("10.00").compareTo(transfer.getAmount()), "Amount should be 10.00");
     }

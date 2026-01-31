@@ -1,7 +1,7 @@
 package com.example.divi.security;
 
 import com.example.divi.service.JwtService;
-import com.example.divi.model.User; // Upewnij się, że to Twój model User
+import com.example.divi.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
